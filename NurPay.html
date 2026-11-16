@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NurPay — биржа игровых аккаунтов</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1310;--bg2:#151d18;--bg3:#1d2822;--border:#2a3830;--text:#e8f0ea;--muted:#8aa396;--accent:#22c55e;--accent-h:#16a34a;--accent-dark:#0f7a3d;--green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6}
+body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:9px;cursor:pointer;font-weight:800;font-size:19px;user-select:none}
+.logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:900;color:#06210f;box-shadow:0 4px 14px rgba(34,197,94,.35)}
+.logo-text b{color:var(--accent)}
+nav{display:flex;gap:3px;flex:1;flex-wrap:wrap}
+nav button{background:transparent;border:none;color:var(--muted);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:.15s}
+nav button:hover{background:var(--bg3);color:var(--text)}
+nav button.active{background:var(--accent);color:#06210f;font-weight:700}
+.hdr-right{display:flex;gap:7px;align-items:center}
+.chip{background:var(--bg3);padding:7px 12px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border)}
+.chip b{color:var(--accent)}
+.badge{position:relative}
+.badge .dot{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;background:var(--red);border-radius:8px;font-size:10px;display:flex;align-items:center;justify-content:center;padding:0 4px;color:#fff;font-weight:700}
+main{max-width:1320px;margin:0 auto;padding:20px}
+.hidden{display:none!important}
+.filter-bar{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.search-wrap{flex:1;min-width:200px;display:flex;gap:7px}
+.filter-bar input,.filter-bar select{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:13px;outline:none;font-family:inherit}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--accent)}
+.search-wrap input{flex:1}
+.sort-chips{display:flex;gap:5px;flex-wrap:wrap}
+.sort-chip{background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:6px 11px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;white-space:nowrap}
+.sort-chip:hover{border-color:var(--accent);color:var(--text)}
+.sort-chip.active{background:var(--accent);border-color:var(--accent);color:#06210f}
+.price-row{display:flex;gap:5px;align-items:center;font-size:12.5px;color:var(--muted)}
+.price-row input{width:80px}
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px;margin-bottom:20px}
+.game-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px;cursor:pointer;transition:.15s;text-align:center}
+.game-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.game-card.selected{border-color:var(--accent);background:#132a1c}
+.game-card .emoji{font-size:24px;margin-bottom:3px}
+.game-card .name{font-weight:600;font-size:11.5px;line-height:1.2;min-height:28px;display:flex;align-items:center;justify-content:center}
+.game-card .count{font-size:10.5px;color:var(--muted);margin-top:2px}
+.show-more-games{grid-column:1/-1;background:transparent;border:1px dashed var(--border);color:var(--muted);padding:9px;border-radius:10px;cursor:pointer;font-size:12.5px}
+.show-more-games:hover{border-color:var(--accent);color:var(--accent)}
+.cat-bar{display:flex;gap:7px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px}
+.cat-bar::-webkit-scrollbar{height:6px}
+.cat-bar::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.cat-chip{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:20px;cursor:pointer;font-size:12.5px;white-space:nowrap;transition:.15s;font-weight:500;flex-shrink:0}
+.cat-chip:hover{border-color:var(--accent)}
+.cat-chip.active{background:var(--accent);border-color:var(--accent);color:#06210f;font-weight:700}
+.cat-chip .cat-count{font-size:10.5px;opacity:.7;margin-left:4px}
+.lots-list{display:flex;flex-direction:column;gap:9px}
+.lot{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;transition:.15s}
+.lot:hover{border-color:var(--accent)}
+.lot-info{flex:1;cursor:pointer;min-width:0}
+.lot-title{font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lot-meta{font-size:12px;color:var(--muted);display:flex;gap:9px;flex-wrap:wrap}
+.lot-meta .cat-tag{background:var(--bg3);padding:2px 7px;border-radius:6px;color:var(--accent);font-weight:600}
+.lot-price{font-size:17px;font-weight:700;color:var(--accent);white-space:nowrap}
+.lot-actions{display:flex;gap:5px}
+.fav-btn{background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px}
+.fav-btn.active{color:var(--red)}
+.btn{background:var(--accent);color:#06210f;border:none;padding:9px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;transition:.15s}
+.btn:hover{background:var(--accent-h)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-sm{padding:6px 11px;font-size:12px}
+.btn-ghost{background:var(--bg3);border:1px solid var(--border);color:var(--text)}
+.btn-ghost:hover{background:var(--border)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-purple{background:var(--purple);color:#fff}
+.form-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:600px;margin:0 auto}
+.form-card h2{margin-bottom:14px;font-size:17px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:13px;outline:none;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+.field textarea{resize:vertical;min-height:75px}
+.hint{font-size:11px;color:var(--muted);margin-top:4px}
+.deals-list{display:flex;flex-direction:column;gap:9px}
+.deal-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px;cursor:pointer;transition:.15s}
+.deal-card:hover{border-color:var(--accent)}
+.deal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px}
+.deal-title{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status-badge{font-size:10px;font-weight:700;padding:4px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.status-WAITING_PAYMENT{background:#3a3a3a;color:var(--yellow)}
+.status-PAID{background:#143b24;color:var(--green)}
+.status-IN_PROGRESS{background:#1a2c4a;color:#6aa5ff}
+.status-FROZEN{background:#2a2a1a;color:var(--yellow)}
+.status-COMPLETED{background:#143b24;color:var(--green)}
+.status-DISPUTE{background:#3a1a1a;color:var(--red)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:14px;width:100%;max-width:660px;max-height:92vh;display:flex;flex-direction:column}
+.modal-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.modal-header h3{font-size:15px}
+.close-btn{background:transparent;border:none;color:var(--muted);font-size:23px;cursor:pointer;line-height:1}
+.close-btn:hover{color:var(--text)}
+.modal-body{padding:16px 18px;overflow-y:auto;flex:1}
+.chat-box{background:var(--bg3);border-radius:10px;padding:11px;height:250px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:9px}
+.msg{max-width:78%;padding:7px 11px;border-radius:10px;font-size:13px}
+.msg.me{align-self:flex-end;background:var(--accent);color:#06210f}
+.msg.them{align-self:flex-start;background:var(--bg);border:1px solid var(--border)}
+.msg .who{font-size:10.5px;opacity:.75;margin-bottom:2px;font-weight:600}
+.msg .when{font-size:9.5px;opacity:.5;margin-top:3px}
+.chat-input{display:flex;gap:7px}
+.chat-input input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:13px;outline:none}
+.chat-input input:focus{border-color:var(--accent)}
+.chat-locked{background:#2a1a1a;border:1px solid var(--red);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--red);text-align:center}
+.secret-box{background:#12291b;border:1px solid var(--accent);border-radius:10px;padding:12px;margin-bottom:11px;font-size:13.5px}
+.secret-box code{background:#061a0e;padding:3px 7px;border-radius:4px;font-family:monospace;color:var(--accent);word-break:break-all}
+.pay-summary{background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:11px}
+.pay-row{display:flex;justify-content:space-between;margin-bottom:6px;font-size:12.5px;gap:8px}
+.pay-row.total{border-top:1px solid var(--border);padding-top:8px;margin-top:8px;font-weight:700;font-size:14px}
+.pay-row .green{color:var(--accent)}
+.wallet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:11px;margin-bottom:18px}
+.wallet-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:15px}
+.wallet-card .label{font-size:12px;color:var(--muted);margin-bottom:5px}
+.wallet-card .value{font-size:22px;font-weight:700}
+.wallet-card.green .value{color:var(--accent)}
+.wallet-card.yellow .value{color:var(--yellow)}
+.wallet-card.blue .value{color:var(--blue)}
+.wallet-card.orange .value{color:var(--yellow)}
+.amount-row{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
+.amount-row input{flex:1;min-width:110px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:13px;outline:none}
+.amount-row input:focus{border-color:var(--accent)}
+.section-title{font-size:16px;margin-bottom:12px;font-weight:700}
+.empty{text-align:center;color:var(--muted);padding:30px;font-size:13px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border);padding:11px 20px;border-radius:10px;font-size:13px;z-index:3000;opacity:0;transition:.25s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.5);max-width:90vw}
+.toast.show{opacity:1;bottom:32px}
+.toast.success{border-color:var(--accent);color:var(--accent)}
+.toast.error{border-color:var(--red);color:var(--red)}
+.badge-you{background:var(--accent);color:#06210f;font-size:9.5px;padding:2px 6px;border-radius:4px;margin-left:5px;font-weight:700}
+.ai-fab{position:fixed;bottom:20px;right:20px;z-index:900;width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#06210f;font-size:24px;cursor:pointer;box-shadow:0 6px 20px rgba(34,197,94,.45);display:flex;align-items:center;justify-content:center;transition:.2s}
+.ai-fab:hover{transform:scale(1.08)}
+.ai-fab .dot{position:absolute;top:3px;right:3px;width:11px;height:11px;background:var(--red);border-radius:50%;border:2px solid var(--bg)}
+.ai-window{position:fixed;bottom:88px;right:20px;z-index:901;width:370px;max-width:calc(100vw - 40px);height:540px;max-height:calc(100vh - 120px);background:var(--bg2);border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.6);overflow:hidden}
+.ai-head{background:linear-gradient(135deg,var(--accent-dark),var(--accent));padding:12px 14px;display:flex;align-items:center;gap:9px;color:#06210f}
+.ai-head .avatar{width:32px;height:32px;border-radius:50%;background:#06210f;color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px}
+.ai-head .title{font-weight:800;font-size:13.5px}
+.ai-head .subtitle{font-size:10.5px;opacity:.85}
+.ai-head .close-btn{margin-left:auto;color:#06210f;font-size:22px}
+.ai-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:7px;background:var(--bg)}
+.ai-msg{max-width:88%;padding:8px 11px;border-radius:12px;font-size:12.5px;line-height:1.45;white-space:pre-wrap}
+.ai-msg.bot{align-self:flex-start;background:var(--bg3);border:1px solid var(--border);border-bottom-left-radius:4px}
+.ai-msg.user{align-self:flex-end;background:var(--accent);color:#06210f;border-bottom-right-radius:4px;font-weight:500}
+.ai-msg.typing{display:flex;gap:4px;padding:11px 13px}
+.ai-msg.typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:bounce 1.2s infinite}
+.ai-msg.typing span:nth-child(2){animation-delay:.2s}
+.ai-msg.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-6px);opacity:1}}
+.ai-quick{display:flex;flex-wrap:wrap;gap:5px;padding:0 12px 8px;background:var(--bg)}
+.ai-quick button{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:11px;padding:4px 9px;border-radius:20px;cursor:pointer}
+.ai-quick button:hover{border-color:var(--accent);color:var(--accent)}
+.ai-input-row{display:flex;gap:7px;padding:10px 12px;border-top:1px solid var(--border);background:var(--bg2)}
+.ai-input-row input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 11px;border-radius:10px;font-size:12.5px;outline:none}
+.ai-input-row input:focus{border-color:var(--accent)}
+.sec-badge{display:inline-flex;align-items:center;gap:5px;background:#12291b;border:1px solid var(--accent);padding:3px 9px;border-radius:20px;font-size:11.5px;color:var(--accent);font-weight:600}
+.sec-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:10px}
+.sec-row:last-child{border-bottom:none}
+.sec-row .lbl{font-size:13.5px;font-weight:600}
+.sec-row .desc{font-size:11.5px;color:var(--muted);margin-top:3px}
+.recovery-code{background:#061a0e;border:1px dashed var(--accent);padding:9px 13px;border-radius:8px;font-family:monospace;color:var(--accent);font-size:12.5px;word-break:break-all;margin-top:7px}
+.pm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:7px;margin-bottom:13px}
+.pm-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;text-align:center;transition:.15s}
+.pm-card:hover{border-color:var(--accent)}
+.pm-card.selected{border-color:var(--accent);background:#132a1c}
+.pm-card .icon{font-size:20px;margin-bottom:3px}
+.pm-card .nm{font-size:11.5px;font-weight:600}
+.pm-card .fee{font-size:10px;color:var(--muted);margin-top:2px}
+.auth-tabs{display:flex;gap:5px;margin-bottom:14px}
+.auth-tabs button{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:9px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600}
+.auth-tabs button.active{background:var(--accent);border-color:var(--accent);color:#06210f}
+.notif-panel{position:absolute;top:100%;right:0;margin-top:8px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:340px;max-height:420px;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.6);z-index:500}
+.notif-item{padding:11px 14px;border-bottom:1px solid var(--border);font-size:12.5px;cursor:pointer}
+.notif-item:hover{background:var(--bg3)}
+.notif-item.unread{background:#12291b}
+.notif-item .when{font-size:10.5px;color:var(--muted);margin-top:3px}
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px}
+.admin-stat{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.admin-stat .lbl{font-size:11.5px;color:var(--muted);margin-bottom:4px}
+.admin-stat .val{font-size:22px;font-weight:700;color:var(--accent)}
+table.admin{width:100%;border-collapse:collapse;font-size:12.5px}
+table.admin th{text-align:left;padding:9px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.3px}
+table.admin td{padding:9px 8px;border-bottom:1px solid var(--border)}
+table.admin tr:hover td{background:var(--bg3)}
+.tag{display:inline-block;padding:2px 7px;border-radius:6px;font-size:10.5px;font-weight:700}
+.tag-green{background:#143b24;color:var(--accent)}
+.tag-red{background:#3a1a1a;color:var(--red)}
+.tag-yellow{background:#3a3a1a;color:var(--yellow)}
+.tag-blue{background:#1a2c4a;color:#6aa5ff}
+.timer-badge{display:inline-block;background:#3a3a1a;color:var(--yellow);padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600;margin-left:8px}
+.frozen-info{background:#2a2a1a;border:1px solid var(--yellow);border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px}
+.frozen-info b{color:var(--yellow)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo" id="logo-btn" title="NurPay">
+    <div class="logo-icon">N</div>
+    <div class="logo-text">Nur<b>Pay</b></div>
+  </div>
+  <nav id="main-nav">
+    <button data-tab="catalog" class="active" onclick="switchTab('catalog')">Каталог</button>
+    <button data-tab="sell" onclick="switchTab('sell')">Продать</button>
+    <button data-tab="deals" onclick="switchTab('deals')">Сделки</button>
+    <button data-tab="favorites" onclick="switchTab('favorites')">Избранное</button>
+    <button data-tab="wallet" onclick="switchTab('wallet')">Кошелёк</button>
+    <button data-tab="profile" onclick="switchTab('profile')">Профиль</button>
+    <button data-tab="security" onclick="switchTab('security')">Безопасность</button>
+    <button data-tab="admin" class="hidden" id="admin-tab" onclick="switchTab('admin')">Админ</button>
+  </nav>
+  <div class="hdr-right">
+    <div class="chip badge" id="notif-btn" onclick="toggleNotif()" style="display:none">🔔<span class="dot" id="notif-dot" style="display:none"></span></div>
+    <div class="chip" onclick="switchTab('wallet')">Баланс: <b id="hdr-balance">0 ₽</b></div>
+    <div class="chip" id="user-chip" onclick="openAuth()">Войти</div>
+  </div>
+  <div class="notif-panel hidden" id="notif-panel" style="position:absolute;top:62px;right:20px"></div>
+</header>
+
+<main>
+  <section id="tab-catalog">
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <input id="search" placeholder="Поиск по названию, игре, продавцу..." oninput="renderCatalog()">
+        <select id="seller-filter" onchange="renderCatalog()">
+          <option value="">Все продавцы</option>
+          <option value="online">Только онлайн</option>
+          <option value="top">С высоким рейтингом</option>
+        </select>
+      </div>
+      <div class="sort-chips" id="sort-chips">
+        <div class="sort-chip active" data-s="popular" onclick="setSort('popular')">🔥 Популярные</div>
+        <div class="sort-chip" data-s="cheap" onclick="setSort('cheap')">↓ Дешевле</div>
+        <div class="sort-chip" data-s="expensive" onclick="setSort('expensive')">↑ Дороже</div>
+        <div class="sort-chip" data-s="new" onclick="setSort('new')">✨ Новые</div>
+      </div>
+      <div class="price-row">
+        <input id="price-min" type="number" placeholder="от ₽" oninput="renderCatalog()">
+        <span>—</span>
+        <input id="price-max" type="number" placeholder="до ₽" oninput="renderCatalog()">
+        <button class="sort-chip" onclick="resetFilters()" title="Сбросить">✕</button>
+      </div>
+    </div>
+    <div class="games-grid" id="games-grid"></div>
+    <div class="cat-bar hidden" id="cat-bar"></div>
+    <div class="section-title" id="lots-title">Все лоты</div>
+    <div class="lots-list" id="lots-list"></div>
+  </section>
+
+  <section id="tab-sell" class="hidden">
+    <div class="form-card">
+      <h2>Выставить лот на продажу</h2>
+      <div class="field"><label>Игра</label><select id="new-game" onchange="onSellGameChange()"></select></div>
+      <div class="field"><label>Категория</label><select id="new-category"></select></div>
+      <div class="field"><label>Название лота</label><input id="new-title" placeholder="Например: Genshin AR58 · 15x5★ · C1 Hu Tao"></div>
+      <div class="field"><label>Описание</label><textarea id="new-desc" placeholder="Сервер, персонажи, что входит, условия..."></textarea></div>
+      <div class="field"><label>Цена, ₽</label><input id="new-price" type="number" min="1" placeholder="1500"><div class="hint">Комиссия 5% — вы получите 95% от цены.</div></div>
+      <div class="field"><label>🔐 Данные аккаунта / контент</label><input id="new-secret" placeholder="login: xxx | pass: yyy (или промокод/описание услуги)"></div>
+      <button class="btn" style="width:100%" onclick="createLot()">Выставить лот</button>
+    </div>
+  </section>
+
+  <section id="tab-deals" class="hidden">
+    <div class="section-title">Мои сделки</div>
+    <div class="deals-list" id="deals-list"></div>
+  </section>
+
+  <section id="tab-favorites" class="hidden">
+    <div class="section-title">Избранное</div>
+    <div class="lots-list" id="fav-list"></div>
+  </section>
+
+  <section id="tab-wallet" class="hidden">
+    <div class="section-title">Кошелёк</div>
+    <div class="wallet-grid">
+      <div class="wallet-card green"><div class="label">Доступный баланс</div><div class="value" id="wal-balance">0 ₽</div></div>
+      <div class="wallet-card orange"><div class="label">❄️ Заморожено (48ч)</div><div class="value" id="wal-frozen">0 ₽</div></div>
+      <div class="wallet-card yellow"><div class="label">⏳ В ожидании вывода</div><div class="value" id="wal-pending">0 ₽</div></div>
+      <div class="wallet-card blue"><div class="label">Заработано</div><div class="value" id="wal-earned">0 ₽</div></div>
+    </div>
+
+    <div class="form-card" style="margin:0 0 14px 0;max-width:100%">
+      <h2>💳 Пополнение кошелька</h2>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:9px">Выберите способ (0% комиссия):</div>
+      <div class="pm-grid" id="dep-methods"></div>
+      <div id="dep-fields"></div>
+      <div class="amount-row">
+        <input id="dep-amount" type="number" min="1" placeholder="Сумма, ₽">
+        <button class="btn" onclick="deposit()">Пополнить</button>
+      </div>
+    </div>
+
+    <div class="form-card" style="margin:0 0 14px 0;max-width:100%">
+      <h2>🎟️ Промокод</h2>
+      <div class="amount-row">
+        <input id="promo-input" placeholder="Введите промокод">
+        <button class="btn btn-purple" onclick="redeemPromo()">Активировать</button>
+      </div>
+    </div>
+
+    <div class="form-card" style="margin:0 0 14px 0;max-width:100%">
+      <h2>🏦 Вывод средств <span style="font-size:11px;color:var(--yellow);font-weight:400">— комиссия 5% + одобрение поддержки</span></h2>
+      <div class="frozen-info">
+        <b>❄️ Заморозка 48 часов:</b> средства после подтверждения сделки замораживаются на 48 часов. Вывести их можно только после разморозки <b>и</b> одобрения заявки поддержкой.
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:9px">Выберите способ:</div>
+      <div class="pm-grid" id="wd-methods"></div>
+      <div id="wd-fields"></div>
+      <div class="amount-row">
+        <input id="wd-amount" type="number" min="1" placeholder="Сумма к выводу, ₽" oninput="updateWdPreview()">
+        <button class="btn btn-ghost" onclick="withdraw()">Подать заявку</button>
+      </div>
+      <div id="wd-preview" style="font-size:12px;color:var(--muted);margin-top:9px"></div>
+    </div>
+
+    <div class="section-title" style="margin-top:22px">Мои заявки на вывод</div>
+    <div id="wd-requests-list"></div>
+
+    <div class="section-title" style="margin-top:22px">История транзакций</div>
+    <div id="tx-history"></div>
+  </section>
+
+  <section id="tab-profile" class="hidden">
+    <div class="section-title">Профиль</div>
+    <div class="form-card" style="max-width:100%">
+      <div id="profile-info"></div>
+      <div style="margin-top:16px">
+        <div class="field"><label>Имя</label><input id="prof-name" placeholder="Ваше имя"></div>
+        <button class="btn btn-sm" onclick="saveProfile()">Сохранить</button>
+      </div>
+      <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border)">
+        <h3 style="font-size:15px;margin-bottom:9px">🎁 Реферальная программа</h3>
+        <div style="font-size:12.5px;color:var(--muted);margin-bottom:9px">Пригласите друга — получайте 1% от его продаж</div>
+        <div class="secret-box"><code id="ref-code"></code></div>
+        <button class="btn btn-sm btn-ghost" onclick="copyRef()">📋 Скопировать ссылку</button>
+        <div style="font-size:12px;color:var(--muted);margin-top:9px">Заработано: <b style="color:var(--accent)" id="ref-earned">0 ₽</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-security" class="hidden">
+    <div class="section-title">🔐 Безопасность аккаунта</div>
+    <div class="form-card" style="max-width:100%">
+      <div class="sec-row"><div><div class="lbl">Двухфакторная аутентификация (2FA)</div><div class="desc">TOTP через Google Authenticator / Telegram</div></div><button class="btn btn-sm" id="twofa-btn" onclick="toggle2FA()">Включить</button></div>
+      <div class="sec-row"><div><div class="lbl">PIN-код на вывод</div><div class="desc">Запрашивается при каждой операции вывода</div></div><button class="btn btn-sm" id="pin-btn" onclick="setupPin()">Установить</button></div>
+      <div class="sec-row"><div><div class="lbl">Шифрование данных</div><div class="desc">AES-256-GCM. Доступ только покупателю в сделке</div></div><span class="sec-badge">✓ Включено</span></div>
+      <div class="sec-row"><div><div class="lbl">Активные сессии</div><div class="desc" id="sessions-info">1 активная сессия</div></div><button class="btn btn-sm btn-ghost" onclick="killSessions()">Завершить все</button></div>
+      <div class="sec-row"><div><div class="lbl">Лимит вывода</div><div class="desc" id="limit-info">—</div></div><button class="btn btn-sm btn-ghost" onclick="setLimit()">Изменить</button></div>
+      <div class="sec-row"><div><div class="lbl">Резервные коды</div><div class="desc">На случай потери 2FA</div></div><button class="btn btn-sm btn-ghost" onclick="genRecovery()">Сгенерировать</button></div>
+      <div class="sec-row"><div><div class="lbl">KYC-верификация</div><div class="desc">Необходима для вывода от 50 000 ₽</div></div><button class="btn btn-sm" id="kyc-btn" onclick="requestKyc()">Пройти</button></div>
+      <div id="recovery-box"></div>
+    </div>
+  </section>
+
+  <section id="tab-admin" class="hidden">
+    <div class="section-title">Админ-панель</div>
+    <div class="admin-grid" id="admin-stats"></div>
+    <div style="display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap">
+      <button class="btn btn-sm" onclick="renderAdmin('withdrawals')">💸 Заявки на вывод</button>
+      <button class="btn btn-sm btn-ghost" onclick="renderAdmin('disputes')">⚠️ Споры</button>
+      <button class="btn btn-sm btn-ghost" onclick="renderAdmin('users')">👥 Пользователи</button>
+      <button class="btn btn-sm btn-ghost" onclick="renderAdmin('lots')">📦 Лоты</button>
+      <button class="btn btn-sm btn-ghost" onclick="renderAdmin('chats')">💬 Все чаты</button>
+    </div>
+    <div id="admin-content"></div>
+  </section>
+</main>
+
+<button class="ai-fab" onclick="toggleAI()" title="ИИ-поддержка">🤖<span class="dot"></span></button>
+<div class="ai-window hidden" id="ai-window">
+  <div class="ai-head">
+    <div class="avatar">N</div>
+    <div><div class="title">NurPay AI</div><div class="subtitle">Мгновенные ответы · 24/7</div></div>
+    <button class="close-btn" onclick="toggleAI()">×</button>
+  </div>
+  <div class="ai-body" id="ai-body"></div>
+  <div class="ai-quick" id="ai-quick"></div>
+  <div class="ai-input-row">
+    <input id="ai-input" placeholder="Задайте вопрос..." onkeydown="if(event.key==='Enter')aiSend()">
+    <button class="btn btn-sm" onclick="aiSend()">➤</button>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="auth-modal" onclick="if(event.target===this)closeAuth()">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header"><h3 id="auth-title">Вход в NurPay</h3><button class="close-btn" onclick="closeAuth()">×</button></div>
+    <div class="modal-body" id="auth-body"></div>
+  </div>
+</div>
+<div class="modal-overlay hidden" id="admin-login-modal" onclick="if(event.target===this)closeAdminLogin()">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header"><h3>🔐 Служебный вход</h3><button class="close-btn" onclick="closeAdminLogin()">×</button></div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Секретный пароль администратора</label>
+        <input id="admin-secret-input" type="password" placeholder="Введите пароль" onkeydown="if(event.key==='Enter')tryAdminLogin()" autocomplete="off">
+      </div>
+      <button class="btn" style="width:100%" onclick="tryAdminLogin()">Войти</button>
+      <div class="hint" style="margin-top:10px;text-align:center;color:var(--red)" id="admin-err"></div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay hidden" id="ad-modal" onclick="if(event.target===this)closeAd()">
+  <div class="modal"><div class="modal-header"><h3 id="ad-title">Объявление</h3><button class="close-btn" onclick="closeAd()">×</button></div><div class="modal-body" id="ad-body"></div></div>
+</div>
+<div class="modal-overlay hidden" id="deal-modal" onclick="if(event.target===this)closeDeal()">
+  <div class="modal"><div class="modal-header"><h3 id="deal-modal-title">Сделка</h3><button class="close-btn" onclick="closeDeal()">×</button></div><div class="modal-body" id="deal-modal-body"></div></div>
+</div>
+<div class="modal-overlay hidden" id="pay-modal" onclick="if(event.target===this)closePay()">
+  <div class="modal" style="max-width:480px"><div class="modal-header"><h3>Оплата сделки</h3><button class="close-btn" onclick="closePay()">×</button></div><div class="modal-body" id="pay-modal-body"></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   СЕКРЕТ АДМИНА
+   ================================================================ */
+const ADMIN_SECRET = "NurPay2024Admin"; // ← СМЕНИТЕ ЭТО НА СВОЙ ПАРОЛЬ
+
+const DB={
+  load(k,d){try{const v=JSON.parse(localStorage.getItem('nurpay_'+k));return v===null?d:v}catch{return d}},
+  save(k,v){localStorage.setItem('nurpay_'+k,JSON.stringify(v))}
+};
+
+const GAMES_RAW=[
+['🔫','CS2',['Аккаунты','Скины','Кейсы','Prime','Услуги (буст ранга)']],
+['🎯','Valorant',['Аккаунты','Скины','Донат (VP)','Услуги (буст ранга)','Riot Points']],
+['💥','Call of Duty: Warzone',['Аккаунты','Скины','Донат','Услуги']],
+['🎖️','Call of Duty: MW3',['Аккаунты','Скины','Донат']],
+['🪖','Escape from Tarkov',['Аккаунты','Валюта (рубли)','Услуги']],
+['🏹','Apex Legends',['Аккаунты','Скины','Донат (Apex Coins)','Услуги']],
+['🌈','Overwatch 2',['Аккаунты','Скины','Донат']],
+['🔫','Rainbow Six Siege',['Аккаунты','Скины','Донат (R6 Credits)']],
+['⚔️','PUBG',['Аккаунты','Скины','Донат (G-Coin)']],
+['🔫','PUBG Mobile',['Аккаунты','UC','Скины','Промокоды']],
+['🌪️','Free Fire',['Аккаунты','Алмазы','Скины','Промокоды']],
+['🎯','Warface',['Аккаунты','Донат','Услуги']],
+['💣','CrossFire',['Аккаунты','Скины','Донат']],
+['🔫','Standoff 2',['Аккаунты','Скины','Донат (голда)']],
+['🎮','Point Blank',['Аккаунты','Донат','Скины']],
+['🛡️','Dota 2',['Аккаунты','Предметы','Скины','Услуги (буст MMR)','Battle Pass']],
+['⚔️','League of Legends',['Аккаунты','Скины','Донат (RP)','Услуги (буст ранга)']],
+['🌍','League of Legends: Wild Rift',['Аккаунты','Скины','Донат (WC)']],
+['📱','Mobile Legends',['Аккаунты','Алмазы','Скины','Промокоды']],
+['🏆','Honor of Kings',['Аккаунты','Скины','Донат']],
+['⚡','Arena of Valor',['Аккаунты','Скины','Донат']],
+['🎮','Smite',['Аккаунты','Скины','Донат (Gems)']],
+['🛡️','Heroes of the Storm',['Аккаунты','Скины']],
+['⚔️','Heroes of Newerth',['Аккаунты']],
+['🏗️','Fortnite',['Аккаунты','В-баксы','Скины','Услуги']],
+['🎁','Genshin Impact',['Аккаунты','Гемы (кристаллы)','Услуги','Промокоды','Аккаунты с 5★']],
+['⭐','Honkai: Star Rail',['Аккаунты','Oneiric Shard','Услуги','Промокоды']],
+['🌸','Honkai Impact 3rd',['Аккаунты','Кристаллы','Услуги']],
+['🌊','Wuthering Waves',['Аккаунты','Кристаллы','Услуги']],
+['❄️','Zenless Zone Zero',['Аккаунты','Кристаллы','Услуги']],
+['🐉','Tower of Fantasy',['Аккаунты','Донат','Услуги']],
+['🗡️','Punishing: Gray Raven',['Аккаунты','Донат']],
+['🌙','Arknights',['Аккаунты','Донат (OP)']],
+['🎴','Azur Lane',['Аккаунты','Донат (алмазы)']],
+['🧝','Fate/Grand Order',['Аккаунты','Донат (SQ)']],
+['🌸','Blue Archive',['Аккаунты','Донат']],
+['⚔️','Nikke',['Аккаунты','Донат']],
+['⚔️','World of Warcraft',['Аккаунты','Голд','Услуги (буст)','Игровое время']],
+['🗡️','Final Fantasy XIV',['Аккаунты','Гил','Услуги']],
+['🐉','Black Desert Online',['Аккаунты','Серебро','Услуги','Донат']],
+['🏰','Lineage 2',['Аккаунты','Адена','Услуги','Донат']],
+['⚔️','Albion Online',['Аккаунты','Серебро','Услуги']],
+['🌟','Lost Ark',['Аккаунты','Голд','Услуги']],
+['🗡️','Path of Exile',['Аккаунты','Валюта','Услуги']],
+['⚔️','Path of Exile 2',['Аккаунты','Валюта','Услуги']],
+['🏹','Diablo IV',['Аккаунты','Услуги']],
+['🗡️','Diablo Immortal',['Аккаунты','Донат','Услуги']],
+['🌍','Elder Scrolls Online',['Аккаунты','Голд','Донат (кроны)']],
+['⚔️','Guild Wars 2',['Аккаунты','Голд','Донат (гемы)']],
+['🐺','New World',['Аккаунты','Голд']],
+['⚔️','RuneScape',['Аккаунты','Голд','Bonds']],
+['🏰','Old School RuneScape',['Аккаунты','Голд','Bonds']],
+['⛏️','Minecraft',['Аккаунты','Ключи','Сервера','Услуги','Гифты']],
+['🧱','Roblox',['Аккаунты','Robux','Промокоды','Предметы']],
+['🌴','Rust',['Аккаунты','Скины','Услуги']],
+['🧟','DayZ',['Аккаунты','Услуги']],
+['🏝️','Terraria',['Аккаунты','Ключи']],
+['🌌','No Man\'s Sky',['Аккаунты','Ключи']],
+['🦖','ARK: Survival Evolved',['Аккаунты','Услуги','Ключи']],
+['🦕','ARK: Survival Ascended',['Аккаунты','Ключи']],
+['🌊','Subnautica',['Аккаунты','Ключи']],
+['🌲','The Forest',['Аккаунты','Ключи']],
+['🏕️','Sons of the Forest',['Аккаунты','Ключи']],
+['🧟','Project Zomboid',['Аккаунты','Ключи']],
+['🚀','Space Engineers',['Аккаунты','Ключи']],
+['⛏️','Deep Rock Galactic',['Аккаунты','Ключи']],
+['🏝️','Palworld',['Аккаунты','Ключи','Услуги']],
+['🐉','Enshrouded',['Аккаунты','Ключи']],
+['⚔️','Valheim',['Аккаунты','Ключи']],
+['🌋','V Rising',['Аккаунты','Ключи']],
+['🗡️','Elden Ring',['Аккаунты','Ключи','Услуги (буст)']],
+['⚔️','Dark Souls III',['Аккаунты','Ключи']],
+['🩸','Bloodborne',['Аккаунты']],
+['⚔️','Sekiro',['Аккаунты','Ключи']],
+['🐺','Lies of P',['Аккаунты','Ключи']],
+['⚔️','Nioh 2',['Аккаунты','Ключи']],
+['🧙','The Witcher 3',['Аккаунты','Ключи']],
+['🧙','Baldur\'s Gate 3',['Аккаунты','Ключи']],
+['🐉','Dragon Age',['Аккаунты','Ключи']],
+['⚔️','Skyrim',['Аккаунты','Ключи']],
+['🌌','Starfield',['Аккаунты','Ключи']],
+['🪐','Mass Effect Legendary',['Аккаунты','Ключи']],
+['🤖','Cyberpunk 2077',['Аккаунты','Ключи']],
+['🕵️','Red Dead Redemption 2',['Аккаунты','Ключи','Услуги (RDO)']],
+['🐎','GTA V',['Аккаунты','Шарки (донат)','Услуги','Ключи']],
+['🚗','GTA VI',['Аккаунты','Ключи']],
+['🏙️','GTA Online',['Аккаунты','Шарки','Услуги']],
+['🐎','Red Dead Online',['Аккаунты','Голд','Услуги']],
+['🗡️','Assassin\'s Creed Valhalla',['Аккаунты','Ключи']],
+['🗡️','Assassin\'s Creed Mirage',['Аккаунты','Ключи']],
+['🏹','Horizon Zero Dawn',['Аккаунты','Ключи']],
+['🏹','Horizon Forbidden West',['Аккаунты','Ключи']],
+['🪓','God of War',['Аккаунты','Ключи']],
+['🪓','God of War Ragnarök',['Аккаунты','Ключи']],
+['🌊','Ghost of Tsushima',['Аккаунты','Ключи']],
+['⚔️','Final Fantasy XVI',['Аккаунты','Ключи']],
+['🌿','Final Fantasy VII Remake',['Аккаунты','Ключи']],
+['⚔️','Monster Hunter World',['Аккаунты','Ключи']],
+['🐉','Monster Hunter Rise',['Аккаунты','Ключи']],
+['🐉','Monster Hunter Wilds',['Аккаунты','Ключи']],
+['🦖','Dragon\'s Dogma 2',['Аккаунты','Ключи']],
+['🏰','Age of Empires IV',['Аккаунты','Ключи']],
+['🏰','Age of Empires II DE',['Аккаунты','Ключи']],
+['🌍','Civilization VI',['Аккаунты','Ключи']],
+['🚀','Stellaris',['Аккаунты','Ключи']],
+['🪐','Hearts of Iron IV',['Аккаунты','Ключи']],
+['⚔️','Crusader Kings III',['Аккаунты','Ключи']],
+['🛡️','Europa Universalis IV',['Аккаунты','Ключи']],
+['⚔️','Total War: Warhammer III',['Аккаунты','Ключи']],
+['🏰','Total War: Rome II',['Аккаунты','Ключи']],
+['🌌','StarCraft II',['Аккаунты','Услуги','Ключи']],
+['⚔️','Warcraft III Reforged',['Аккаунты','Ключи']],
+['⚔️','Company of Heroes 3',['Аккаунты','Ключи']],
+['⚔️','XCOM 2',['Аккаунты','Ключи']],
+['🏙️','Cities: Skylines II',['Аккаунты','Ключи']],
+['🏙️','Cities: Skylines',['Аккаунты','Ключи']],
+['🚂','Transport Fever 2',['Аккаунты','Ключи']],
+['🌾','Farming Simulator 22',['Аккаунты','Ключи']],
+['🌾','Farming Simulator 25',['Аккаунты','Ключи']],
+['⚽','EA FC 24',['Аккаунты','FC Points','Монеты','Услуги']],
+['⚽','EA FC 25',['Аккаунты','FC Points','Монеты','Услуги']],
+['⚽','eFootball',['Аккаунты','Монеты','Услуги']],
+['⚽','Football Manager 24',['Аккаунты','Ключи']],
+['🏀','NBA 2K24',['Аккаунты','VC','Ключи']],
+['🏀','NBA 2K25',['Аккаунты','VC','Ключи']],
+['🏈','Madden NFL 25',['Аккаунты','Ключи']],
+['🏎️','F1 24',['Аккаунты','Ключи']],
+['🏎️','Forza Horizon 5',['Аккаунты','Ключи','Услуги']],
+['🏎️','Forza Motorsport',['Аккаунты','Ключи']],
+['🏎️','Gran Turismo 7',['Аккаунты','Кредиты']],
+['🏎️','Assetto Corsa',['Аккаунты','Ключи']],
+['🏎️','Need for Speed Unbound',['Аккаунты','Ключи']],
+['🚗','Rocket League',['Аккаунты','Кредиты','Скины']],
+['🚗','BeamNG.drive',['Аккаунты','Ключи']],
+['👊','Street Fighter 6',['Аккаунты','Ключи','Донат']],
+['👊','Tekken 8',['Аккаунты','Ключи']],
+['👊','Mortal Kombat 1',['Аккаунты','Ключи','Донат']],
+['🥊','Super Smash Bros Ultimate',['Аккаунты']],
+['👊','Guilty Gear Strive',['Аккаунты','Ключи']],
+['👊','Dragon Ball FighterZ',['Аккаунты','Ключи']],
+['👻','Phasmophobia',['Аккаунты','Ключи']],
+['🧟','Dead by Daylight',['Аккаунты','Ключи','Услуги']],
+['🐻','Five Nights at Freddy\'s',['Аккаунты','Ключи']],
+['👻','Resident Evil 4 Remake',['Аккаунты','Ключи']],
+['🧟','Resident Evil Village',['Аккаунты','Ключи']],
+['🩸','Outlast Trials',['Аккаунты','Ключи']],
+['🕯️','Lethal Company',['Аккаунты','Ключи']],
+['👁️','Content Warning',['Аккаунты','Ключи']],
+['🌾','Stardew Valley',['Аккаунты','Ключи']],
+['🍳','Overcooked 2',['Аккаунты','Ключи']],
+['🚀','Among Us',['Аккаунты','Ключи','Скины']],
+['🎨','Fall Guys',['Аккаунты','Донат','Скины']],
+['🌌','Outer Wilds',['Аккаунты','Ключи']],
+['🏝️','Animal Crossing',['Аккаунты','Донат','Услуги']],
+['🕹️','It Takes Two',['Аккаунты','Ключи']],
+['🧩','Portal 2',['Аккаунты','Ключи']],
+['🧩','Portal',['Аккаунты','Ключи']],
+['🧙','Hogwarts Legacy',['Аккаунты','Ключи']],
+['🎭','Detroit: Become Human',['Аккаунты','Ключи']],
+['🌌','Death Stranding',['Аккаунты','Ключи']],
+['🎮','The Last of Us Part I',['Аккаунты','Ключи']],
+['🎮','The Last of Us Part II',['Аккаунты','Ключи']],
+['🕷️','Spider-Man 2',['Аккаунты','Ключи']],
+['🕷️','Spider-Man Remastered',['Аккаунты','Ключи']],
+['🦇','Batman Arkham Knight',['Аккаунты','Ключи']],
+['🎯','Uncharted: Legacy',['Аккаунты','Ключи']],
+['🏴‍☠️','Sea of Thieves',['Аккаунты','Ключи','Донат (Ancient Coins)']],
+['🏴‍☠️','Skull and Bones',['Аккаунты','Ключи']],
+['🌌','Star Citizen',['Аккаунты','Корабли','UEC']],
+['🚀','EVE Online',['Аккаунты','ISK','Услуги']],
+['⚔️','Warframe',['Аккаунты','Платина','Услуги']],
+['🌟','Destiny 2',['Аккаунты','Silver','Услуги']],
+['🛡️','The Division 2',['Аккаунты','Ключи','Услуги']],
+['🎯','Rainbow Six Extraction',['Аккаунты','Ключи']],
+['🌍','Riders Republic',['Аккаунты','Ключи']],
+['🏔️','Steep',['Аккаунты','Ключи']],
+['⛷️','SSX',['Аккаунты']],
+['🍄','Mario Kart 8 Deluxe',['Аккаунты']],
+['🍄','Super Mario Odyssey',['Аккаунты']],
+['🗡️','Zelda: Tears of the Kingdom',['Аккаунты']],
+['🗡️','Zelda: Breath of the Wild',['Аккаунты']],
+['🐉','Pokémon Scarlet',['Аккаунты','Покемоны','Услуги']],
+['🐉','Pokémon Violet',['Аккаунты','Покемоны','Услуги']],
+['🐉','Pokémon GO',['Аккаунты','Монеты','Услуги']],
+['🐉','Pokémon Sword',['Аккаунты','Покемоны']],
+['🐉','Pokémon Shield',['Аккаунты','Покемоны']],
+['🐉','Pokémon Legends Arceus',['Аккаунты']],
+['🏝️','Splatoon 3',['Аккаунты','Донат']],
+['🍄','Animal Crossing: New Horizons',['Аккаунты','Услуги','Bells']],
+['🎮','PlayStation Plus',['Подписки']],
+['🎮','Xbox Game Pass',['Подписки']],
+['🎮','Nintendo Switch Online',['Подписки']],
+['🎮','EA Play',['Подписки']],
+['🎮','Ubisoft+',['Подписки']],
+['🎮','Steam',['Аккаунты','Ключи','Гифты','Пополнение кошелька']],
+['🎮','Epic Games',['Аккаунты','Ключи','Гифты']],
+['🎮','Battle.net',['Аккаунты','Ключи','Пополнение баланса']],
+['🎮','Origin / EA App',['Аккаунты','Ключи']],
+['🎮','Ubisoft Connect',['Аккаунты','Ключи']],
+['🎮','GOG',['Аккаунты','Ключи']],
+['🎮','Riot Games',['Аккаунты','Пополнение']],
+['🎮','Rockstar Games',['Аккаунты','Шарки']],
+['📱','Brawl Stars',['Аккаунты','Гемы','Скины','Промокоды']],
+['📱','Clash of Clans',['Аккаунты','Гемы','Услуги']],
+['📱','Clash Royale',['Аккаунты','Гемы','Услуги']],
+['📱','Hay Day',['Аккаунты','Алмазы']],
+['📱','Coin Master',['Аккаунты','Спины']],
+['📱','Genshin (моб.)',['Аккаунты','Гемы']],
+['📱','AFK Arena',['Аккаунты','Донат']],
+['📱','Raid: Shadow Legends',['Аккаунты','Гемы']],
+['📱','Rise of Kingdoms',['Аккаунты','Гемы']],
+['📱','Lords Mobile',['Аккаунты','Гемы']],
+['📱','State of Survival',['Аккаунты','Донат']],
+['📱','Call of Duty Mobile',['Аккаунты','CP','Скины']],
+['📱','Garena Free Fire MAX',['Аккаунты','Алмазы','Промокоды']],
+['📱','Standoff 2 Mobile',['Аккаунты','Голда','Скины']],
+['📱','Among Us Mobile',['Аккаунты','Скины']],
+['📱','Stumble Guys',['Аккаунты','Гемы','Скины']],
+['📱','Subway Surfers',['Аккаунты','Монеты']],
+['📱','Talking Tom',['Аккаунты']],
+['📱','Last Day on Earth',['Аккаунты','Донат']],
+['📱','Clash Mini',['Аккаунты','Донат']],
+['🎲','Garry\'s Mod',['Аккаунты','Ключи']],
+['🏗️','Scrap Mechanic',['Аккаунты','Ключи']],
+['🚀','Kerbal Space Program',['Аккаунты','Ключи']],
+['🎨','Roblox Studio',['Аккаунты','Robux']],
+['🎬','The Sims 4',['Аккаунты','Донат','Ключи']],
+['🎬','The Sims 3',['Аккаунты','Ключи']],
+['🏙️','SimCity',['Аккаунты','Ключи']],
+['🏭','Factorio',['Аккаунты','Ключи']],
+['🧠','Human Fall Flat',['Аккаунты','Ключи']],
+['🏄','Riders Republic 2',['Аккаунты','Ключи']],
+['🪂','PUBG: New State',['Аккаунты','NC','Скины']],
+['🎮','Steam Wallet',['Пополнение кошелька','Гифты','Ключи']],
+['🎮','PSN Card',['Гифты','Пополнение']],
+['🎮','Xbox Gift Card',['Гифты','Пополнение']],
+['🎮','Nintendo eShop',['Гифты','Пополнение']],
+];
+
+const state={games:GAMES_RAW.map((g,i)=>({id:'g'+i,emoji:g[0],name:g[1],categories:g[2]}))};
+
+let store={
+  user:DB.load('user',null),
+  lots:DB.load('lots',[]),
+  deals:DB.load('deals',[]),
+  messages:DB.load('messages',[]),
+  transactions:DB.load('transactions',[]),
+  aiHistory:DB.load('aiHistory',[]),
+  favorites:DB.load('favorites',[]),
+  notifications:DB.load('notifications',[]),
+  reviews:DB.load('reviews',[]),
+  promoUses:DB.load('promoUses',[]),
+  users:DB.load('users',[]),
+  withdrawRequests:DB.load('withdrawRequests',[]),
+  disputes:DB.load('disputes',[]),
+  chats:DB.load('chats',[]),
+  auditLog:DB.load('auditLog',[]),
+};
+
+const PROMOS=[
+  {code:'NURPAY100',amount:10000,uses:100,minPurchase:50000},
+  {code:'WELCOME500',amount:50000,uses:50,minPurchase:0},
+  {code:'GAMER2024',amount:25000,uses:200,minPurchase:20000},
+];
+
+if(!store.user){
+  store.user={
+    id:'u_me',email:'me@nurpay.local',name:'Вы',balance:500000,frozen:0,earned:0,
+    twoFA:false,pin:null,limit:5000000,sessions:1,kyc:'NONE',
+    depositMethod:'sbp',withdrawMethod:'sbp',withdrawDetails:{},depositDetails:{},
+    isSeller:false,rating:0,ratingCount:0,referralEarned:0,referralCode:'NUR'+Math.random().toString(36).slice(2,8).toUpperCase(),
+    isAdmin:false,createdAt:Date.now(),
+  };
+  DB.save('user',store.user);
+}
+['earned','referralEarned','rating','ratingCount','frozen'].forEach(k=>{if(store.user[k]===undefined)store.user[k]=0});
+if(!store.user.referralCode)store.user.referralCode='NUR'+Math.random().toString(36).slice(2,8).toUpperCase();
+
+if(store.lots.length===0){
+  const sellers=[
+    {id:'u_demo1',name:'ShadowSeller',rating:4.9,online:true},
+    {id:'u_demo2',name:'ProGamer',rating:4.7,online:false},
+    {id:'u_demo3',name:'AccShop',rating:4.8,online:true},
+    {id:'u_demo4',name:'FastBoost',rating:5.0,online:true},
+    {id:'u_demo5',name:'GameKeys',rating:4.6,online:false},
+  ];
+  const demoLots=[
+    ['g25','Аккаунты','Genshin AR58 · 15x5★ · C1 Hu Tao',420000,'gi_login | pass'],
+    ['g25','Гемы (кристаллы)','6480 гемов · мгновенно',580000,'промокод-nurpay-6480'],
+    ['g0','Аккаунты','CS2 Prime · 5000 часов · Global Elite',250000,'cs2_login | pass'],
+    ['g0','Скины','AK-47 Redline FT',180000,'trade-ссылка'],
+    ['g16','Аккаунты','Dota 2 · 8000 MMR · Immortal',750000,'dota_login | pass'],
+    ['g16','Услуги (буст MMR)','Буст 1000 MMR',250000,'started'],
+    ['g18','Алмазы','ML · 5000 алмазов',160000,'promo-ml'],
+    ['g17','Аккаунты','Valorant · Radiant · 40 скинов',310000,'val_login | pass'],
+    ['g17','Скины','Elderflame Vandal',450000,'trade'],
+    ['g9','UC','PUBG Mobile · 660 UC',80000,'id-login'],
+    ['g39','Аккаунты','Steam · 120 игр · 8 лет',680000,'steam_login | pass'],
+    ['g39','Ключи','Cyberpunk 2077 (Steam Key)',190000,'KEY-ABCD-1234'],
+    ['g24','Аккаунты','Fortnite · OG Renegade Raider',1500000,'epic_login | pass'],
+    ['g24','В-баксы','2800 V-Bucks',210000,'gift-code'],
+    ['g36','Аккаунты','Roblox · 100k Robux',1400000,'login | pass'],
+    ['g36','Robux','1000 Robux',35000,'gift'],
+    ['g51','Аккаунты','Minecraft Premium · Java+Bedrock',210000,'mc_login | pass'],
+    ['g51','Ключи','Minecraft Java Key',180000,'KEY-MC-1234'],
+    ['g2','Аккаунты','Warzone · 200+ скинов',320000,'at_login | pass'],
+    ['g72','Аккаунты','Elden Ring · все достижения',280000,'steam_login | pass'],
+    ['g82','Аккаунты','GTA V Online · 500 lvl · 200M$',420000,'rockstar_login | pass'],
+    ['g82','Шарки (донат)','10 000 000 GTA$',70000,'shark-code'],
+    ['g213','Подписки','PS Plus 12 мес',500000,'psn-code-12m'],
+    ['g208','Алмазы','Brawl Stars · 2000 гемов',140000,'promo-bs'],
+  ];
+  store.lots=demoLots.map((l,i)=>{
+    const s=sellers[i%sellers.length];
+    const g=state.games.find(x=>x.id===l[0])||state.games[0];
+    return{
+      id:'lot_'+i,sellerId:s.id,sellerName:s.name,sellerRating:s.rating,sellerOnline:s.online,
+      gameId:g.id,gameName:g.name,gameEmoji:g.emoji,category:l[1],title:l[2],
+      desc:'Проверенный лот от продавца '+s.name+'. Безопасная сделка через гарант NurPay.',
+      price:l[3],secret:l[4],status:'ACTIVE',views:Math.floor(Math.random()*900)+10,
+      createdAt:Date.now()-Math.floor(Math.random()*30)*86400000,
+    };
+  });
+  DB.save('lots',store.lots);
+}
+
+const COMMISSION=0.05;
+const FREEZE_MS=48*60*60*1000;
+
+const persist=()=>['user','lots','deals','messages','transactions','aiHistory','favorites','notifications','reviews','promoUses','users','withdrawRequests','disputes','chats','auditLog'].forEach(k=>DB.save(k,store[k]));
+
+const fmt=n=>Number(n/100).toLocaleString('ru-RU')+' ₽';
+const uid=p=>p+'_'+Math.random().toString(36).slice(2,10);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const now=()=>Date.now();
+
+function toast(msg,type=''){
+  const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;
+  clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',2800);
+}
+function requireAuth(){
+  if(!store.user){openAuth();return false}
+  return true;
+}
+function logAction(action,meta){
+  store.auditLog.push({id:uid('log'),action,meta,userId:store.user?.id||'anon',at:now()});
+  if(store.auditLog.length>5000)store.auditLog=store.auditLog.slice(-5000);
+  persist();
+}
+
+/* ================================================================
+   СЕКРЕТНЫЙ ВХОД В АДМИНКУ
+   ================================================================ */
+let logoClicks=[];
+document.getElementById('logo-btn').addEventListener('click',(e)=>{
+  // Обычный клик — переход в каталог (если не идёт серия)
+  const nowTime=Date.now();
+  logoClicks.push(nowTime);
+  logoClicks=logoClicks.filter(t=>nowTime-t<2000); // окно 2 секунды
+  if(logoClicks.length>=5){
+    logoClicks=[];
+    if(store.user?.isAdmin){
+      toast('Вы уже администратор','success');
+      switchTab('admin');
+      return;
+    }
+    openAdminLogin();
+    return;
+  }
+  // Не мешаем обычному клику
+  switchTab('catalog');
+});
+
+function openAdminLogin(){
+  document.getElementById('admin-secret-input').value='';
+  document.getElementById('admin-err').textContent='';
+  document.getElementById('admin-login-modal').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('admin-secret-input').focus(),100);
+}
+function closeAdminLogin(){
+  document.getElementById('admin-login-modal').classList.add('hidden');
+  document.getElementById('admin-secret-input').value='';
+  document.getElementById('admin-err').textContent='';
+}
+function tryAdminLogin(){
+  const inp=document.getElementById('admin-secret-input');
+  const val=inp.value;
+  if(val===ADMIN_SECRET){
+    if(!store.user){
+      // Если не вошли как обычный пользователь — создаём сессию
+      store.user={
+        id:'u_admin',email:'admin@nurpay.local',name:'Администратор',balance:0,frozen:0,earned:0,
+        twoFA:false,pin:null,limit:100000000,sessions:1,kyc:'VERIFIED',
+        depositMethod:'sbp',withdrawMethod:'sbp',withdrawDetails:{},depositDetails:{},
+        isSeller:false,rating:0,ratingCount:0,referralEarned:0,referralCode:'ADMIN',
+        isAdmin:true,role:'ADMIN',createdAt:now(),
+      };
+    } else {
+      store.user.isAdmin=true;
+      store.user.role='ADMIN';
+    }
+    persist();
+    logAction('admin_login',{});
+    closeAdminLogin();
+    refreshUI();
+    toast('Добро пожаловать, администратор','success');
+    switchTab('admin');
+  } else {
+    document.getElementById('admin-err').textContent='Неверный пароль';
+    logAction('admin_login_failed',{});
+    inp.value='';
+    inp.focus();
+  }
+}
+
+/* ================================================================
+   НАВИГАЦИЯ
+   ================================================================ */
+function switchTab(tab){
+  if(['sell','deals','wallet','profile','security'].includes(tab)&&!requireAuth())return;
+  if(tab==='admin'){
+    if(!requireAuth())return;
+    if(!store.user?.isAdmin){toast('Доступ запрещён','error');return}
+  }
+  document.querySelectorAll('main > section').forEach(s=>s.classList.add('hidden'));
+  document.getElementById('tab-'+tab).classList.remove('hidden');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  if(tab==='catalog')renderCatalog();
+  if(tab==='deals')renderDeals();
+  if(tab==='wallet')renderWallet();
+  if(tab==='sell')fillSellForm();
+  if(tab==='security')renderSecurity();
+  if(tab==='favorites')renderFavorites();
+  if(tab==='profile')renderProfile();
+  if(tab==='admin')renderAdmin('withdrawals');
+}
+
+/* ================================================================
+   АВТОРИЗАЦИЯ
+   ================================================================ */
+let authMode='login';
+function openAuth(mode='login'){
+  authMode=mode;renderAuth();
+  document.getElementById('auth-modal').classList.remove('hidden');
+}
+function closeAuth(){document.getElementById('auth-modal').classList.add('hidden')}
+function renderAuth(){
+  document.getElementById('auth-title').textContent=authMode==='login'?'Вход в NurPay':'Регистрация в NurPay';
+  document.getElementById('auth-body').innerHTML=`
+    <div class="auth-tabs">
+      <button class="${authMode==='login'?'active':''}" onclick="authMode='login';renderAuth()">Вход</button>
+      <button class="${authMode==='register'?'active':''}" onclick="authMode='register';renderAuth()">Регистрация</button>
+    </div>
+    ${authMode==='register'?`<div class="field"><label>Имя</label><input id="auth-name" placeholder="Ваше имя"></div>`:''}
+    <div class="field"><label>Email</label><input id="auth-email" type="email" placeholder="you@mail.com"></div>
+    <div class="field"><label>Пароль</label><input id="auth-pass" type="password" placeholder="Минимум 6 символов"></div>
+    ${authMode==='register'?`<div class="field"><label>Реферальный код (опционально)</label><input id="auth-ref" placeholder="NURXXXXXX"></div>`:''}
+    <button class="btn" style="width:100%;margin-top:9px" onclick="submitAuth()">${authMode==='login'?'Войти':'Зарегистрироваться'}</button>
+    <div class="hint" style="margin-top:10px;text-align:center">Демо-режим: данные хранятся локально в браузере</div>`;
+}
+function submitAuth(){
+  const email=document.getElementById('auth-email').value.trim();
+  const pass=document.getElementById('auth-pass').value;
+  if(!email||!pass)return toast('Заполните поля','error');
+  if(pass.length<6)return toast('Пароль от 6 символов','error');
+  if(authMode==='register'){
+    const name=document.getElementById('auth-name').value.trim()||email.split('@')[0];
+    const ref=document.getElementById('auth-ref').value.trim();
+    const newUser={
+      id:uid('u'),email,password:pass,name,balance:0,frozen:0,earned:0,
+      twoFA:false,pin:null,limit:5000000,sessions:1,kyc:'NONE',
+      depositMethod:'sbp',withdrawMethod:'sbp',withdrawDetails:{},depositDetails:{},
+      isSeller:false,rating:0,ratingCount:0,referralEarned:0,
+      referralCode:'NUR'+Math.random().toString(36).slice(2,8).toUpperCase(),
+      isAdmin:false,createdAt:Date.now(),
+    };
+    if(ref){
+      const found=store.users.find(u=>u.referralCode===ref);
+      if(found)newUser.referrerId=found.id;
+    }
+    store.users.push(newUser);store.user=newUser;
+    persist();closeAuth();logAction('register',{email});
+    toast('Добро пожаловать!','success');
+    refreshUI();
+  }else{
+    const all=[store.user,...store.users].filter(Boolean);
+    let u=all.find(x=>x.email===email&&x.password===pass);
+    if(!u){
+      u={...store.user,email,name:email.split('@')[0],id:uid('u'),password:pass,createdAt:Date.now()};
+    }
+    store.user=u;persist();closeAuth();logAction('login',{email});
+    toast('Вы вошли','success');
+    refreshUI();
+  }
+}
+function logout(){
+  logAction('logout',{});
+  store.user=null;persist();toast('Вы вышли','success');refreshUI();
+}
+function refreshUI(){
+  document.getElementById('hdr-balance').textContent=store.user?fmt(store.user.balance):'0 ₽';
+  document.getElementById('user-chip').textContent=store.user?(store.user.name||'Профиль'):'Войти';
+  document.getElementById('user-chip').onclick=store.user?()=>switchTab('profile'):()=>openAuth();
+  document.getElementById('admin-tab').classList.toggle('hidden',!store.user?.isAdmin);
+  document.getElementById('notif-btn').style.display=store.user?'flex':'none';
+  renderNotifications();
+  renderCatalog();
+}
+
+/* ================================================================
+   КАТАЛОГ
+   ================================================================ */
+let filter={game:'',category:'',q:'',sort:'popular',minPrice:0,maxPrice:0,sellerType:''};
+let gamesExpanded=false;
+function setSort(s){
+  filter.sort=s;
+  document.querySelectorAll('#sort-chips .sort-chip').forEach(c=>c.classList.toggle('active',c.dataset.s===s));
+  renderCatalog();
+}
+function resetFilters(){
+  filter={game:'',category:'',q:'',sort:'popular',minPrice:0,maxPrice:0,sellerType:''};
+  document.getElementById('search').value='';
+  document.getElementById('price-min').value='';
+  document.getElementById('price-max').value='';
+  document.getElementById('seller-filter').value='';
+  document.querySelectorAll('#sort-chips .sort-chip').forEach(c=>c.classList.toggle('active',c.dataset.s==='popular'));
+  renderCatalog();
+}
+function renderCatalog(){
+  filter.q=document.getElementById('search').value.trim().toLowerCase();
+  filter.minPrice=(+document.getElementById('price-min').value||0)*100;
+  filter.maxPrice=(+document.getElementById('price-max').value||0)*100;
+  filter.sellerType=document.getElementById('seller-filter').value;
+
+  const counts={};
+  store.lots.filter(l=>l.status==='ACTIVE').forEach(l=>{counts[l.gameId]=(counts[l.gameId]||0)+1});
+
+  const gg=document.getElementById('games-grid');gg.innerHTML='';
+  const withLots=state.games.filter(g=>counts[g.id]);
+  const noLots=state.games.filter(g=>!counts[g.id]);
+  let list;
+  if(filter.game)list=state.games;
+  else if(gamesExpanded)list=[...withLots,...noLots];
+  else list=withLots.slice(0,24);
+
+  list.forEach(g=>{
+    const div=document.createElement('div');
+    div.className='game-card'+(filter.game===g.id?' selected':'');
+    div.innerHTML=`<div class="emoji">${g.emoji}</div><div class="name">${esc(g.name)}</div><div class="count">${counts[g.id]||0} лотов</div>`;
+    div.onclick=()=>{
+      if(filter.game===g.id){filter.game='';filter.category=''}
+      else{filter.game=g.id;filter.category=''}
+      renderCatalog();renderCategoryBar();
+      gg.scrollIntoView({behavior:'smooth',block:'start'});
+    };
+    gg.appendChild(div);
+  });
+
+  if(!filter.game){
+    const btn=document.createElement('button');
+    btn.className='show-more-games';
+    btn.textContent=gamesExpanded?'← Свернуть':`Показать все ${state.games.length} игр →`;
+    btn.onclick=()=>{gamesExpanded=!gamesExpanded;renderCatalog()};
+    gg.appendChild(btn);
+  }
+
+  renderCategoryBar();
+  renderLots();
+}
+function renderCategoryBar(){
+  const bar=document.getElementById('cat-bar');
+  if(!filter.game){bar.classList.add('hidden');return}
+  bar.classList.remove('hidden');
+  const g=state.games.find(x=>x.id===filter.game);
+  const catCounts={};
+  store.lots.filter(l=>l.gameId===g.id&&l.status==='ACTIVE').forEach(l=>{catCounts[l.category]=(catCounts[l.category]||0)+1});
+  bar.innerHTML='';
+  const all=document.createElement('div');
+  all.className='cat-chip'+(!filter.category?' active':'');
+  all.textContent='Все категории';
+  all.onclick=()=>{filter.category='';renderCatalog()};
+  bar.appendChild(all);
+  g.categories.forEach(c=>{
+    const div=document.createElement('div');
+    div.className='cat-chip'+(filter.category===c?' active':'');
+    div.innerHTML=`${esc(c)}<span class="cat-count">${catCounts[c]||0}</span>`;
+    div.onclick=()=>{filter.category=filter.category===c?'':c;renderCatalog()};
+    bar.appendChild(div);
+  });
+}
+function renderLots(){
+  let lots=store.lots.filter(l=>l.status==='ACTIVE');
+  if(filter.game)lots=lots.filter(l=>l.gameId===filter.game);
+  if(filter.category)lots=lots.filter(l=>l.category===filter.category);
+  if(filter.q)lots=lots.filter(l=>(l.title+l.desc+l.sellerName+l.gameName+l.category).toLowerCase().includes(filter.q));
+  if(filter.minPrice)lots=lots.filter(l=>l.price>=filter.minPrice);
+  if(filter.maxPrice)lots=lots.filter(l=>l.price<=filter.maxPrice);
+  if(filter.sellerType==='online')lots=lots.filter(l=>l.sellerOnline);
+  if(filter.sellerType==='top')lots=lots.filter(l=>(l.sellerRating||0)>=4.8);
+
+  switch(filter.sort){
+    case 'cheap':lots.sort((a,b)=>a.price-b.price);break;
+    case 'expensive':lots.sort((a,b)=>b.price-a.price);break;
+    case 'new':lots.sort((a,b)=>b.createdAt-a.createdAt);break;
+    default:lots.sort((a,b)=>(b.views||0)-(a.views||0));
+  }
+
+  const titleMap={popular:'Популярные',cheap:'Сначала дешёвые',expensive:'Сначала дорогие',new:'Новые'};
+  let title=filter.game?state.games.find(x=>x.id===filter.game).name:'Все лоты';
+  if(filter.category)title+=' · '+filter.category;
+  document.getElementById('lots-title').textContent=title+` · ${lots.length} (${titleMap[filter.sort]})`;
+
+  const list=document.getElementById('lots-list');list.innerHTML='';
+  if(!lots.length){list.innerHTML='<div class="empty">Лотов не найдено</div>';return}
+
+  lots.forEach(l=>{
+    const mine=store.user&&l.sellerId===store.user.id;
+    const isFav=store.favorites.includes(l.id);
+    const div=document.createElement('div');
+    div.className='lot';
+    div.innerHTML=`
+      <div class="lot-info" onclick="openAd('${l.id}')">
+        <div class="lot-title">${l.gameEmoji} ${esc(l.title)}</div>
+        <div class="lot-meta">
+          <span class="cat-tag">${esc(l.category)}</span>
+          <span>${esc(l.gameName)}</span>
+          <span>${esc(l.sellerName)}${mine?'<span class="badge-you">ВЫ</span>':''} ${l.sellerOnline?'🟢':'⚪'} ★${l.sellerRating||'—'}</span>
+          <span>👁 ${l.views||0}</span>
+        </div>
+      </div>
+      <div class="lot-price">${fmt(l.price)}</div>
+      <div class="lot-actions">
+        <button class="fav-btn ${isFav?'active':''}" onclick="event.stopPropagation();toggleFav('${l.id}')">${isFav?'❤️':'🤍'}</button>
+        <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();openAd('${l.id}')">Чат</button>
+        <button class="btn btn-sm" ${mine?'disabled':''} onclick="event.stopPropagation();openAd('${l.id}')">${mine?'Ваш':'Купить'}</button>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function toggleFav(id){
+  if(!requireAuth())return;
+  const i=store.favorites.indexOf(id);
+  if(i>=0)store.favorites.splice(i,1);
+  else store.favorites.push(id);
+  persist();renderLots();
+  if(!document.getElementById('tab-favorites').classList.contains('hidden'))renderFavorites();
+}
+function renderFavorites(){
+  const list=document.getElementById('fav-list');
+  const lots=store.lots.filter(l=>store.favorites.includes(l.id));
+  if(!lots.length){list.innerHTML='<div class="empty">Избранное пусто</div>';return}
+  list.innerHTML='';
+  lots.forEach(l=>{
+    const mine=l.sellerId===store.user?.id;
+    const div=document.createElement('div');
+    div.className='lot';
+    div.innerHTML=`
+      <div class="lot-info" onclick="openAd('${l.id}')">
+        <div class="lot-title">${l.gameEmoji} ${esc(l.title)}</div>
+        <div class="lot-meta"><span class="cat-tag">${esc(l.category)}</span><span>${esc(l.gameName)}</span><span>${esc(l.sellerName)}</span></div>
+      </div>
+      <div class="lot-price">${fmt(l.price)}</div>
+      <div class="lot-actions">
+        <button class="fav-btn active" onclick="toggleFav('${l.id}')">❤️</button>
+        <button class="btn btn-sm" ${mine?'disabled':''} onclick="openAd('${l.id}')">Открыть</button>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+/* ================================================================
+   ЧАТЫ
+   ================================================================ */
+function getOrCreateChat(lotId){
+  let chat=store.chats.find(c=>c.lotId===lotId);
+  if(!chat){
+    chat={id:uid('chat'),lotId,createdAt:now(),messages:[]};
+    store.chats.push(chat);
+    persist();
+    logAction('chat_created',{lotId,chatId:chat.id});
+  }
+  return chat;
+}
+function addChatMessage(lotId,userId,userName,text){
+  if(!text.trim())return;
+  const chat=getOrCreateChat(lotId);
+  const msg={id:uid('msg'),authorId:userId,authorName:userName,text,createdAt:now()};
+  chat.messages.push(msg);
+  store.messages.push({id:msg.id,adLotId:lotId,authorId:userId,authorName:userName,text,createdAt:msg.createdAt});
+  persist();
+  logAction('message_sent',{lotId,chatId:chat.id,msgId:msg.id});
+  return chat;
+}
+
+let currentAdId=null;
+function openAd(id){
+  currentAdId=id;
+  const l=store.lots.find(x=>x.id===id);
+  if(!l)return;
+  l.views=(l.views||0)+1;persist();
+  const mine=store.user&&l.sellerId===store.user.id;
+  document.getElementById('ad-title').textContent=l.title;
+  const body=document.getElementById('ad-body');
+  const chat=getOrCreateChat(id);
+  const canWrite=!!store.user;
+
+  body.innerHTML=`
+    <div class="pay-summary">
+      <div class="pay-row"><span>Игра</span><span>${l.gameEmoji} ${esc(l.gameName)}</span></div>
+      <div class="pay-row"><span>Категория</span><span>${esc(l.category)}</span></div>
+      <div class="pay-row"><span>Продавец</span><span>${esc(l.sellerName)} ${l.sellerOnline?'🟢 онлайн':''} · ★${l.sellerRating||'—'}</span></div>
+      <div class="pay-row"><span>Гарант</span><span class="green">✓ NurPay Escrow</span></div>
+      <div class="pay-row total"><span>Цена</span><span class="green">${fmt(l.price)}</span></div>
+    </div>
+    ${l.desc?`<div style="font-size:13px;line-height:1.5;margin-bottom:12px;color:#c9d8cf">${esc(l.desc)}</div>`:''}
+    <div style="font-weight:600;margin-bottom:7px;font-size:13px">💬 Чат с продавцом <span style="font-size:11px;color:var(--muted);font-weight:400">(сохраняется навсегда)</span></div>
+    <div class="chat-box" id="ad-chat-box"></div>
+    ${canWrite?`
+      <div class="chat-input">
+        <input id="ad-chat-input" placeholder="Написать продавцу..." onkeydown="if(event.key==='Enter')sendAdMsg()">
+        <button class="btn btn-sm" onclick="sendAdMsg()">➤</button>
+      </div>
+    `:`
+      <div class="chat-locked">Войдите, чтобы написать в чат</div>
+    `}
+    <div style="margin-top:13px;display:flex;gap:7px;flex-wrap:wrap">
+      ${mine
+        ?`<button class="btn btn-danger" style="flex:1" onclick="cancelLot('${l.id}')">Снять лот</button>`
+        :`<button class="btn" style="flex:1" onclick="closeAd();startBuy('${l.id}')">Купить · ${fmt(l.price)}</button>`}
+    </div>
+    <div class="hint" style="margin-top:9px">🔒 Все сообщения сохраняются навсегда и не могут быть удалены — это защита для арбитража.</div>`;
+  document.getElementById('ad-modal').classList.remove('hidden');
+  renderAdChat(chat,l.sellerName);
+}
+function renderAdChat(chat,sellerName){
+  const box=document.getElementById('ad-chat-box');
+  if(!box)return;
+  if(!chat.messages.length){box.innerHTML='<div class="empty" style="padding:13px;font-size:12px">Задайте вопрос продавцу — история сохранится</div>';return}
+  box.innerHTML='';
+  chat.messages.forEach(m=>{
+    const isMe=store.user&&m.authorId===store.user.id;
+    const div=document.createElement('div');
+    div.className='msg '+(isMe?'me':'them');
+    div.innerHTML=`<div class="who">${isMe?'Вы':esc(sellerName)}</div>${esc(m.text)}<div class="when">${new Date(m.createdAt).toLocaleString('ru')}</div>`;
+    box.appendChild(div);
+  });
+  box.scrollTop=box.scrollHeight;
+}
+function sendAdMsg(){
+  if(!requireAuth())return;
+  const inp=document.getElementById('ad-chat-input');
+  const text=inp.value.trim();
+  if(!text||!currentAdId)return;
+  const lot=store.lots.find(x=>x.id===currentAdId);
+  const chat=addChatMessage(currentAdId,store.user.id,store.user.name,text);
+  inp.value='';
+  renderAdChat(chat,lot.sellerName);
+  setTimeout(()=>{
+    if(currentAdId!==lot.id)return;
+    const replies=['Привет! Да, аккаунт актуален.','Всё готово к передаче через сделку.','Могу показать скриншоты.','Торг возможен при быстром выкупе.'];
+    const text=replies[Math.floor(Math.random()*replies.length)];
+    const chat2=addChatMessage(currentAdId,lot.sellerId,lot.sellerName,text);
+    if(currentAdId===lot.id)renderAdChat(chat2,lot.sellerName);
+  },1400);
+}
+function closeAd(){document.getElementById('ad-modal').classList.add('hidden');currentAdId=null}
+function cancelLot(id){
+  const l=store.lots.find(x=>x.id===id);
+  if(!l)return;
+  l.status='SOLD';persist();closeAd();toast('Лот снят','success');renderCatalog();
+  logAction('lot_cancelled',{lotId:id});
+}
+
+/* ================================================================
+   ПРОДАЖА
+   ================================================================ */
+function fillSellForm(){
+  const sel=document.getElementById('new-game');
+  if(sel.options.length===0){
+    state.games.forEach(g=>{const o=document.createElement('option');o.value=g.id;o.textContent=g.emoji+' '+g.name;sel.appendChild(o)});
+  }
+  onSellGameChange();
+}
+function onSellGameChange(){
+  const gid=document.getElementById('new-game').value;
+  const g=state.games.find(x=>x.id===gid);
+  const cs=document.getElementById('new-category');
+  cs.innerHTML='';
+  g.categories.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;cs.appendChild(o)});
+}
+function createLot(){
+  if(!requireAuth())return;
+  const gameId=document.getElementById('new-game').value;
+  const category=document.getElementById('new-category').value;
+  const title=document.getElementById('new-title').value.trim();
+  const desc=document.getElementById('new-desc').value.trim();
+  const price=+document.getElementById('new-price').value;
+  const secret=document.getElementById('new-secret').value.trim();
+  if(!title||!price||price<=0)return toast('Укажите название и цену','error');
+  if(!secret)return toast('Укажите данные/контент','error');
+  const activeLots=store.lots.filter(l=>l.sellerId===store.user.id&&l.status==='ACTIVE').length;
+  if(activeLots>=50)return toast('Лимит 50 активных лотов','error');
+  const g=state.games.find(x=>x.id===gameId);
+  const newLot={
+    id:uid('lot'),sellerId:store.user.id,sellerName:store.user.name,
+    sellerRating:store.user.rating||5,sellerOnline:true,
+    gameId,gameName:g.name,gameEmoji:g.emoji,category,title,desc,
+    price:price*100,secret,status:'ACTIVE',views:0,createdAt:now(),
+  };
+  store.lots.unshift(newLot);
+  store.user.isSeller=true;persist();
+  ['new-title','new-desc','new-price','new-secret'].forEach(i=>document.getElementById(i).value='');
+  toast('Лот выставлен!','success');
+  logAction('lot_created',{lotId:newLot.id});
+  switchTab('catalog');
+}
+
+/* ================================================================
+   ОПЛАТА / СДЕЛКИ
+   ================================================================ */
+let pendingDeal=null;
+let payMethod='balance';
+const PAY_NAMES={
+  balance:'Кошелёк NurPay',sbp:'СБП',card:'Карта РФ',foreign:'Зарубежная карта',
+  crypto:'Крипта',yoomoney:'ЮMoney',qiwi:'QIWI',sbp_qr:'СБП по QR',
+};
+function startBuy(lotId){
+  if(!requireAuth())return;
+  const lot=store.lots.find(x=>x.id===lotId);
+  if(!lot)return;
+  if(lot.sellerId===store.user.id)return toast('Свой лот купить нельзя','error');
+  pendingDeal={
+    id:uid('deal'),lotId:lot.id,lotTitle:lot.title,gameName:lot.gameName,category:lot.category,
+    buyerId:store.user.id,sellerId:lot.sellerId,sellerName:lot.sellerName,
+    amount:lot.price,commission:Math.round(lot.price*COMMISSION),status:'WAITING_PAYMENT',createdAt:now(),
+  };
+  payMethod='balance';
+  renderPayModal();
+  document.getElementById('pay-modal').classList.remove('hidden');
+}
+function renderPayModal(){
+  if(!pendingDeal)return;
+  document.getElementById('pay-modal-body').innerHTML=`
+    <div class="pay-summary">
+      <div class="pay-row"><span>Лот</span><span style="max-width:60%;text-align:right">${esc(pendingDeal.lotTitle)}</span></div>
+      <div class="pay-row"><span>Игра</span><span>${esc(pendingDeal.gameName)}</span></div>
+      <div class="pay-row"><span>Категория</span><span>${esc(pendingDeal.category)}</span></div>
+      <div class="pay-row total"><span>К оплате</span><span class="green">${fmt(pendingDeal.amount)}</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:7px">Способ оплаты:</div>
+    <div class="pm-grid">
+      ${pmCard('balance','💰','Кошелёк',fmt(store.user.balance))}
+      ${pmCard('sbp','📱','СБП','0%')}
+      ${pmCard('card','💳','Карта РФ','0%')}
+      ${pmCard('foreign','🌍','Зарубеж','+2%')}
+      ${pmCard('crypto','₿','Крипта','0%')}
+      ${pmCard('yoomoney','🟣','ЮMoney','0%')}
+      ${pmCard('qiwi','🥝','QIWI','+1%')}
+    </div>
+    <div class="hint" style="margin-bottom:11px">🔒 Деньги в эскроу. После подтверждения — 48ч заморозки у продавца.</div>
+    <button class="btn" style="width:100%" onclick="payDeal()">Оплатить ${fmt(pendingDeal.amount)}</button>`;
+  document.querySelectorAll('#pay-modal-body .pm-card').forEach(c=>c.classList.toggle('selected',c.dataset.m===payMethod));
+}
+function pmCard(m,icon,name,fee){
+  return `<div class="pm-card ${payMethod===m?'selected':''}" data-m="${m}" onclick="setPay('${m}')">
+    <div class="icon">${icon}</div><div class="nm">${name}</div><div class="fee">${fee}</div></div>`;
+}
+function setPay(m){
+  payMethod=m;
+  document.querySelectorAll('#pay-modal-body .pm-card').forEach(c=>c.classList.toggle('selected',c.dataset.m===m));
+}
+function payDeal(){
+  if(!pendingDeal)return;
+  if(payMethod==='balance'){
+    if(store.user.balance<pendingDeal.amount)return toast('Недостаточно на балансе','error');
+    store.user.balance-=pendingDeal.amount;
+  }
+  pendingDeal.status='PAID';
+  pendingDeal.paidAt=now();
+  pendingDeal.payMethod=payMethod;
+  store.deals.unshift(pendingDeal);
+  store.transactions.push({id:uid('tx'),userId:store.user.id,type:'ESCROW_HOLD',amount:pendingDeal.amount,dealId:pendingDeal.id,method:payMethod,createdAt:now()});
+  const lot=store.lots.find(l=>l.id===pendingDeal.lotId);
+  if(lot)lot.status='SOLD';
+  addNotification(store.user.id,'deal','Оплачена сделка: '+pendingDeal.lotTitle);
+  persist();
+  logAction('deal_paid',{dealId:pendingDeal.id,amount:pendingDeal.amount});
+  closePay();
+  toast('Оплачено через '+PAY_NAMES[payMethod],'success');
+  const id=pendingDeal.id;
+  pendingDeal=null;
+  refreshUI();
+  switchTab('deals');
+  setTimeout(()=>openDeal(id),200);
+}
+function closePay(){document.getElementById('pay-modal').classList.add('hidden');pendingDeal=null}
+
+function renderDeals(){
+  const list=document.getElementById('deals-list');
+  const mine=store.deals.filter(d=>d.buyerId===store.user.id||d.sellerId===store.user.id);
+  if(!mine.length){list.innerHTML='<div class="empty">У вас пока нет сделок</div>';return}
+  list.innerHTML='';
+  mine.forEach(d=>{
+    const isBuyer=d.buyerId===store.user.id;
+    const frozenLeft=d.status==='FROZEN'&&d.frozenUntil?Math.max(0,d.frozenUntil-now()):0;
+    const frozenText=frozenLeft>0?formatDuration(frozenLeft):'';
+    const div=document.createElement('div');
+    div.className='deal-card';
+    div.innerHTML=`
+      <div class="deal-head">
+        <div class="deal-title">${esc(d.lotTitle)}</div>
+        <div class="status-badge status-${d.status}">${statusLabel(d.status)}</div>
+      </div>
+      <div class="lot-meta">
+        <span>${isBuyer?'Покупатель':'Продавец'}</span>
+        <span>${fmt(d.amount)}</span>
+        ${d.payMethod?`<span>${PAY_NAMES[d.payMethod]}</span>`:''}
+        ${frozenText?`<span class="timer-badge">❄️ ${frozenText}</span>`:''}
+      </div>`;
+    div.onclick=()=>openDeal(d.id);
+    list.appendChild(div);
+  });
+}
+function formatDuration(ms){
+  const h=Math.floor(ms/3600000);
+  const m=Math.floor((ms%3600000)/60000);
+  return h>0?`${h}ч ${m}м`:`${m}м`;
+}
+function statusLabel(s){
+  return{WAITING_PAYMENT:'Ожидает оплаты',PAID:'Оплачено · эскроу',IN_PROGRESS:'В работе',FROZEN:'❄️ Заморожено 48ч',COMPLETED:'Завершено',DISPUTE:'Спор'}[s]||s;
+}
+let currentDealId=null;
+function openDeal(id){
+  currentDealId=id;
+  const d=store.deals.find(x=>x.id===id);
+  if(!d)return;
+  const isBuyer=d.buyerId===store.user.id,isSeller=d.sellerId===store.user.id;
+  document.getElementById('deal-modal-title').textContent=d.lotTitle;
+  const body=document.getElementById('deal-modal-body');
+  const frozenLeft=d.status==='FROZEN'&&d.frozenUntil?Math.max(0,d.frozenUntil-now()):0;
+
+  let html=`<div class="pay-summary">
+    <div class="pay-row"><span>Статус</span><span class="status-badge status-${d.status}">${statusLabel(d.status)}</span></div>
+    <div class="pay-row"><span>Сумма</span><span>${fmt(d.amount)}</span></div>
+    <div class="pay-row"><span>Комиссия 5%</span><span>${fmt(d.commission)}</span></div>
+    <div class="pay-row total"><span>Продавец получит</span><span class="green">${fmt(d.amount-d.commission)}</span></div>
+  </div>`;
+
+  if(d.status==='FROZEN'&&frozenLeft>0){
+    html+=`<div class="frozen-info">
+      <b>❄️ Средства заморожены</b><br>
+      Разморозка через: <b>${formatDuration(frozenLeft)}</b><br>
+      После разморозки вывести можно будет только через одобрение поддержки.
+    </div>`;
+  }
+
+  if((d.status==='PAID'||d.status==='IN_PROGRESS')&&isBuyer){
+    const lot=store.lots.find(l=>l.id===d.lotId);
+    html+=`<div class="secret-box">
+      <div style="margin-bottom:5px;font-weight:600">🔐 Данные / контент</div>
+      <code>${esc(lot?lot.secret:'—')}</code>
+      <div style="margin-top:7px;font-size:11px;color:var(--muted)">Проверьте и подтвердите</div>
+    </div>`;
+    if(d.status==='PAID')html+=`<button class="btn" style="width:100%;margin-bottom:10px" onclick="confirmDeal('${d.id}')">✅ Подтвердить получение</button>`;
+  }
+  if(d.status==='PAID'&&isSeller)html+=`<button class="btn" style="width:100%;margin-bottom:10px" onclick="markSent('${d.id}')">📤 Передал покупателю</button>`;
+  if(d.status==='IN_PROGRESS'&&isSeller)html+=`<div class="secret-box" style="border-color:var(--yellow);background:#2a2314"><div style="color:var(--yellow)">⏳ Ждём подтверждения от покупателя</div></div>`;
+  if(d.status==='FROZEN')html+=`<div class="frozen-info"><b>⏳ Ожидание разморозки</b><br>После истечения 48ч средства перейдут в «Доступные», но вывод — только через одобрение поддержки.</div>`;
+  if(d.status==='COMPLETED')html+=`<div class="secret-box"><div>✅ Завершено</div></div>`;
+  if((d.status==='PAID'||d.status==='IN_PROGRESS')&&isBuyer)html+=`<button class="btn btn-danger btn-sm" style="margin-bottom:10px" onclick="openDispute('${d.id}')">⚠️ Открыть спор</button>`;
+  if(d.status==='DISPUTE')html+=`<div class="secret-box" style="border-color:var(--red);background:#2a1414"><div style="color:var(--red)">⚠️ Спор открыт</div></div>`;
+
+  html+=`<div style="font-weight:600;margin-bottom:7px;font-size:13px">💬 Чат сделки <span style="font-size:11px;color:var(--muted);font-weight:400">(сохраняется навсегда)</span></div>
+    <div class="chat-box" id="chat-box"></div>
+    <div class="chat-input"><input id="chat-text" placeholder="Написать..." onkeydown="if(event.key==='Enter')sendMsg()"><button class="btn btn-sm" onclick="sendMsg()">➤</button></div>
+    <div class="hint" style="margin-top:9px">🔒 Сообщения сохраняются и не могут быть удалены</div>`;
+  body.innerHTML=html;
+  renderChat();
+  document.getElementById('deal-modal').classList.remove('hidden');
+}
+function closeDeal(){document.getElementById('deal-modal').classList.add('hidden');currentDealId=null}
+function renderChat(){
+  const box=document.getElementById('chat-box');
+  if(!box)return;
+  const msgs=store.messages.filter(m=>m.dealId===currentDealId);
+  if(!msgs.length){box.innerHTML='<div class="empty" style="padding:13px;font-size:12px">Сообщений нет</div>';return}
+  box.innerHTML='';
+  msgs.forEach(m=>{
+    const div=document.createElement('div');
+    div.className='msg '+(m.authorId===store.user.id?'me':'them');
+    div.innerHTML=`<div class="who">${esc(m.authorName)}</div>${esc(m.text)}<div class="when">${new Date(m.createdAt).toLocaleString('ru')}</div>`;
+    box.appendChild(div);
+  });
+  box.scrollTop=box.scrollHeight;
+}
+function sendMsg(){
+  const inp=document.getElementById('chat-text');
+  const text=inp.value.trim();
+  if(!text||!currentDealId)return;
+  const msg={id:uid('msg'),dealId:currentDealId,authorId:store.user.id,authorName:store.user.name,text,createdAt:now()};
+  store.messages.push(msg);
+  inp.value='';persist();
+  logAction('deal_message',{dealId:currentDealId,msgId:msg.id});
+  renderChat();
+}
+function confirmDeal(id){
+  const d=store.deals.find(x=>x.id===id);
+  if(!d||d.status!=='PAID')return;
+  const payout=d.amount-d.commission;
+  d.status='FROZEN';
+  d.completedAt=now();
+  d.frozenUntil=now()+FREEZE_MS;
+  d.payoutAmount=payout;
+  if(d.sellerId===store.user.id){
+    store.user.frozen+=payout;
+    store.user.earned+=payout;
+  }else{
+    const seller=store.users.find(u=>u.id===d.sellerId);
+    if(seller){seller.frozen=(seller.frozen||0)+payout;seller.earned=(seller.earned||0)+payout}
+  }
+  store.transactions.push({id:uid('tx'),userId:d.sellerId,type:'FROZEN',amount:payout,dealId:d.id,frozenUntil:d.frozenUntil,createdAt:now()});
+  if(d.sellerId===store.user.id&&store.user.referrerId){
+    const ref=store.users.find(u=>u.id===store.user.referrerId);
+    if(ref){const bonus=Math.round(payout*0.01);ref.balance+=bonus;ref.referralEarned+=bonus}
+  }
+  addNotification(d.sellerId,'deal','Сделка завершена, средства заморожены на 48ч: '+d.lotTitle);
+  persist();logAction('deal_confirmed',{dealId:id,payout});
+  toast('Сделка завершена! Средства заморожены на 48ч','success');
+  openDeal(id);refreshUI();
+  if(!document.getElementById('tab-wallet').classList.contains('hidden'))renderWallet();
+}
+function markSent(id){
+  const d=store.deals.find(x=>x.id===id);
+  if(!d||d.status!=='PAID')return;
+  d.status='IN_PROGRESS';persist();toast('Покупатель уведомлён','success');openDeal(id);
+}
+function openDispute(id){
+  const d=store.deals.find(x=>x.id===id);
+  if(!d)return;
+  const reason=prompt('Причина спора:');
+  if(!reason)return;
+  d.status='DISPUTE';
+  store.disputes.push({id:uid('dis'),dealId:id,openedBy:store.user.id,reason,status:'OPEN',createdAt:now()});
+  persist();logAction('dispute_opened',{dealId:id});
+  toast('Спор открыт','error');openDeal(id);
+}
+
+/* ================================================================
+   РАЗМОРОЗКА
+   ================================================================ */
+function processUnfreeze(){
+  let changed=false;
+  const nowTime=now();
+  store.deals.forEach(d=>{
+    if(d.status==='FROZEN'&&d.frozenUntil&&d.frozenUntil<=nowTime){
+      d.status='COMPLETED';
+      const payout=d.payoutAmount||(d.amount-d.commission);
+      if(d.sellerId===store.user.id){
+        store.user.frozen=Math.max(0,store.user.frozen-payout);
+        store.user.balance+=payout;
+      }else{
+        const seller=store.users.find(u=>u.id===d.sellerId);
+        if(seller){seller.frozen=Math.max(0,(seller.frozen||0)-payout);seller.balance+=payout}
+      }
+      store.transactions.push({id:uid('tx'),userId:d.sellerId,type:'UNFROZEN',amount:payout,dealId:d.id,createdAt:now()});
+      addNotification(d.sellerId,'wallet','Средства разморожены: '+fmt(payout));
+      changed=true;
+    }
+  });
+  if(changed){persist();refreshUI();if(!document.getElementById('tab-wallet').classList.contains('hidden'))renderWallet();}
+}
+
+/* ================================================================
+   КОШЕЛЁК
+   ================================================================ */
+const DEP_METHODS=[
+  {id:'sbp',name:'СБП',icon:'📱',fee:0},
+  {id:'sbp_qr',name:'СБП QR',icon:'📷',fee:0},
+  {id:'card',name:'Карта РФ',icon:'💳',fee:0},
+  {id:'foreign',name:'Зарубежная',icon:'🌍',fee:0.02},
+  {id:'crypto_usdt',name:'USDT',icon:'₮',fee:0},
+  {id:'crypto_btc',name:'Bitcoin',icon:'₿',fee:0},
+  {id:'crypto_eth',name:'Ethereum',icon:'Ξ',fee:0},
+  {id:'yoomoney',name:'ЮMoney',icon:'🟣',fee:0},
+  {id:'qiwi',name:'QIWI',icon:'🥝',fee:0.01},
+];
+const WD_METHODS=[
+  {id:'sbp',name:'СБП',icon:'📱',fee:0.05},
+  {id:'card',name:'Карта РФ',icon:'💳',fee:0.05},
+  {id:'foreign',name:'Зарубежная',icon:'🌍',fee:0.05},
+  {id:'crypto_usdt',name:'USDT',icon:'₮',fee:0.05},
+  {id:'crypto_btc',name:'Bitcoin',icon:'₿',fee:0.05},
+  {id:'crypto_eth',name:'Ethereum',icon:'Ξ',fee:0.05},
+  {id:'yoomoney',name:'ЮMoney',icon:'🟣',fee:0.05},
+  {id:'qiwi',name:'QIWI',icon:'🥝',fee:0.05},
+];
+function renderMethodGrids(){
+  document.getElementById('dep-methods').innerHTML=DEP_METHODS.map(m=>`
+    <div class="pm-card ${store.user.depositMethod===m.id?'selected':''}" data-m="${m.id}" onclick="pickDep('${m.id}')">
+      <div class="icon">${m.icon}</div><div class="nm">${m.name}</div><div class="fee">${(m.fee*100).toFixed(0)}%</div></div>`).join('');
+  document.getElementById('wd-methods').innerHTML=WD_METHODS.map(m=>`
+    <div class="pm-card ${store.user.withdrawMethod===m.id?'selected':''}" data-m="${m.id}" onclick="pickWd('${m.id}')">
+      <div class="icon">${m.icon}</div><div class="nm">${m.name}</div><div class="fee">${(m.fee*100).toFixed(0)}%</div></div>`).join('');
+}
+function pickDep(id){
+  store.user.depositMethod=id;
+  document.querySelectorAll('#dep-methods .pm-card').forEach(c=>c.classList.toggle('selected',c.dataset.m===id));
+  renderDepFields();persist();
+}
+function pickWd(id){
+  store.user.withdrawMethod=id;
+  document.querySelectorAll('#wd-methods .pm-card').forEach(c=>c.classList.toggle('selected',c.dataset.m===id));
+  renderWdFields();updateWdPreview();persist();
+}
+function renderDepFields(){
+  const m=store.user.depositMethod;const box=document.getElementById('dep-fields');const d=store.user.depositDetails;
+  if(m==='sbp'||m==='yoomoney'||m==='qiwi'){
+    box.innerHTML=`<div class="field"><label>Телефон</label><input id="dep-phone" placeholder="+7 999 123-45-67" value="${esc(d.phone||'')}"></div>`;
+  }else if(m==='card'){
+    box.innerHTML=`<div class="field"><label>Номер карты</label><input id="dep-card" placeholder="2200 0000 0000 0000" value="${esc(d.card||'')}"></div>`;
+  }else if(m==='foreign'){
+    box.innerHTML=`<div class="field"><label>Зарубежная карта</label><input id="dep-foreign" placeholder="Номер карты" value="${esc(d.foreign||'')}"></div>`;
+  }else if(m.startsWith('crypto')){
+    const addr={crypto_usdt:'TQn9Y2k...demo',crypto_btc:'bc1q...demo',crypto_eth:'0x...demo'}[m];
+    box.innerHTML=`<div class="secret-box"><div style="margin-bottom:5px;font-weight:600">Адрес ${m.split('_')[1].toUpperCase()}</div><code>${addr}</code></div>`;
+  }else{
+    box.innerHTML=`<div class="secret-box"><div>QR для сканирования</div><div style="font-size:36px;text-align:center;margin:7px 0">▦▦▦</div></div>`;
+  }
+}
+function renderWdFields(){
+  const m=store.user.withdrawMethod;const box=document.getElementById('wd-fields');const d=store.user.withdrawDetails;
+  if(m==='sbp'||m==='yoomoney'||m==='qiwi'){
+    box.innerHTML=`<div class="field"><label>Телефон</label><input id="wd-phone" placeholder="+7 999 123-45-67" value="${esc(d.phone||'')}"></div>`;
+  }else if(m==='card'){
+    box.innerHTML=`<div class="field"><label>Номер карты</label><input id="wd-card" placeholder="2200 0000 0000 0000" value="${esc(d.card||'')}"></div>`;
+  }else if(m==='foreign'){
+    box.innerHTML=`<div class="field"><label>Карта / IBAN</label><input id="wd-foreign" placeholder="Номер карты или IBAN" value="${esc(d.foreign||'')}"></div>
+      <div class="field"><label>Банк / страна</label><input id="wd-bank" placeholder="Kaspi Bank, KZ" value="${esc(d.bank||'')}"></div>`;
+  }else if(m.startsWith('crypto')){
+    box.innerHTML=`<div class="field"><label>Адрес ${m.split('_')[1].toUpperCase()}</label><input id="wd-wallet" placeholder="Введите адрес кошелька" value="${esc(d.wallet||'')}"></div>`;
+  }
+}
+function updateWdPreview(){
+  const v=(+document.getElementById('wd-amount').value||0)*100;
+  const fee=Math.round(v*COMMISSION);
+  document.getElementById('wd-preview').innerHTML=`Сумма: ${fmt(v)} · Комиссия 5%: <b style="color:var(--yellow)">${fmt(fee)}</b> · К получению: <b style="color:var(--accent)">${fmt(v-fee)}</b>`;
+}
+function deposit(){
+  if(!requireAuth())return;
+  const v=(+document.getElementById('dep-amount').value||0)*100;
+  if(v<=0)return toast('Введите сумму','error');
+  const m=store.user.depositMethod;
+  const mm=DEP_METHODS.find(x=>x.id===m);
+  const fee=Math.round(v*mm.fee);
+  const credited=v-fee;
+  const d=store.user.depositDetails;
+  const ph=document.getElementById('dep-phone');if(ph)d.phone=ph.value;
+  const cd=document.getElementById('dep-card');if(cd)d.card=cd.value;
+  const fr=document.getElementById('dep-foreign');if(fr)d.foreign=fr.value;
+  store.user.balance+=credited;
+  store.transactions.push({id:uid('tx'),userId:store.user.id,type:'DEPOSIT',amount:credited,fee,method:m,createdAt:now()});
+  addNotification(store.user.id,'wallet','Пополнение: '+fmt(credited));
+  persist();logAction('deposit',{amount:credited,method:m});
+  document.getElementById('dep-amount').value='';
+  renderWallet();refreshUI();
+  toast('Пополнено '+fmt(credited)+' через '+mm.name,'success');
+}
+function withdraw(){
+  if(!requireAuth())return;
+  const v=(+document.getElementById('wd-amount').value||0)*100;
+  if(v<=0)return toast('Введите сумму','error');
+  if(v>store.user.balance)return toast('Недостаточно доступных средств. Средства из заморозки станут доступны через 48ч.','error');
+  if(v<10000)return toast('Минимум 100 ₽','error');
+  if(v>store.user.limit)return toast('Превышен дневной лимит','error');
+  if(store.user.pin){
+    const pin=prompt('Введите PIN-код:');
+    if(pin!==store.user.pin)return toast('Неверный PIN','error');
+  }
+  const m=store.user.withdrawMethod;
+  const mm=WD_METHODS.find(x=>x.id===m);
+  const d=store.user.withdrawDetails;
+  const ph=document.getElementById('wd-phone');if(ph)d.phone=ph.value;
+  const cd=document.getElementById('wd-card');if(cd)d.card=cd.value;
+  const fr=document.getElementById('wd-foreign');if(fr)d.foreign=fr.value;
+  const bk=document.getElementById('wd-bank');if(bk)d.bank=bk.value;
+  const wl=document.getElementById('wd-wallet');if(wl)d.wallet=wl.value;
+  const fee=Math.round(v*mm.fee);
+  const out=v-fee;
+  store.user.balance-=v;
+  const req={
+    id:uid('wd'),userId:store.user.id,amount:out,fee,method:m,details:{...d},
+    status:'PENDING',createdAt:now(),
+  };
+  store.withdrawRequests.push(req);
+  store.transactions.push({id:uid('tx'),userId:store.user.id,type:'WITHDRAW_REQUEST',amount:out,fee,method:m,meta:JSON.stringify(d),createdAt:now()});
+  addNotification(store.user.id,'wallet','Заявка на вывод создана: '+fmt(out)+' (ожидает одобрения)');
+  persist();logAction('withdraw_request',{amount:out,method:m});
+  document.getElementById('wd-amount').value='';
+  updateWdPreview();renderWallet();refreshUI();
+  toast('Заявка на '+fmt(out)+' создана. Ожидает одобрения поддержки.','success');
+}
+function renderWallet(){
+  document.getElementById('wal-balance').textContent=fmt(store.user.balance);
+  document.getElementById('wal-frozen').textContent=fmt(store.user.frozen);
+  const pending=store.withdrawRequests.filter(r=>r.userId===store.user.id&&r.status==='PENDING').reduce((a,r)=>a+r.amount,0);
+  document.getElementById('wal-pending').textContent=fmt(pending);
+  document.getElementById('wal-earned').textContent=fmt(store.user.earned);
+  document.getElementById('hdr-balance').textContent=fmt(store.user.balance);
+  renderMethodGrids();
+  renderDepFields();
+  renderWdFields();
+  updateWdPreview();
+  renderWdRequests();
+  renderTxHistory();
+}
+function renderWdRequests(){
+  const reqs=store.withdrawRequests.filter(r=>r.userId===store.user.id).slice(-20).reverse();
+  const box=document.getElementById('wd-requests-list');
+  if(!reqs.length){box.innerHTML='<div class="empty">Заявок нет</div>';return}
+  const stLabel={PENDING:'На рассмотрении',APPROVED:'Одобрено',REJECTED:'Отклонено'};
+  const stColor={PENDING:'yellow',APPROVED:'green',REJECTED:'red'};
+  box.innerHTML='<table class="admin"><thead><tr><th>Дата</th><th>Сумма</th><th>Метод</th><th>Статус</th></tr></thead><tbody>'+
+    reqs.map(r=>`<tr>
+      <td>${new Date(r.createdAt).toLocaleString('ru')}</td>
+      <td>${fmt(r.amount)}</td>
+      <td>${WD_METHODS.find(m=>m.id===r.method)?.name||r.method}</td>
+      <td><span class="tag tag-${stColor[r.status]}">${stLabel[r.status]||r.status}</span>${r.rejectReason?`<div style="font-size:11px;color:var(--red);margin-top:3px">${esc(r.rejectReason)}</div>`:''}</td>
+    </tr>`).join('')+'</tbody></table>';
+}
+function renderTxHistory(){
+  const tx=store.transactions.filter(t=>t.userId===store.user.id).slice(-30).reverse();
+  const box=document.getElementById('tx-history');
+  if(!tx.length){box.innerHTML='<div class="empty">Пока нет операций</div>';return}
+  const typeLabel={DEPOSIT:'Пополнение',WITHDRAW_REQUEST:'Заявка на вывод',FROZEN:'❄️ Заморожено',UNFROZEN:'☀️ Разморожено',ESCROW_HOLD:'Эскроу',ESCROW_RELEASE:'Зачисление',REFUND:'Возврат'};
+  const posTypes=['DEPOSIT','ESCROW_RELEASE','REFUND','UNFROZEN'];
+  box.innerHTML='<table class="admin"><thead><tr><th>Дата</th><th>Тип</th><th>Сумма</th><th>Метод</th></tr></thead><tbody>'+tx.map(t=>`
+    <tr><td>${new Date(t.createdAt).toLocaleDateString('ru')}</td>
+    <td>${typeLabel[t.type]||t.type}</td>
+    <td style="color:${posTypes.includes(t.type)?'var(--accent)':'var(--red)'}">${posTypes.includes(t.type)?'+':'-'}${fmt(t.amount)}</td>
+    <td>${PAY_NAMES[t.method]||t.method||'—'}</td></tr>`).join('')+'</tbody></table>';
+}
+function redeemPromo(){
+  if(!requireAuth())return;
+  const code=document.getElementById('promo-input').value.trim().toUpperCase();
+  if(!code)return;
+  if(store.promoUses.some(p=>p.code===code&&p.userId===store.user.id))return toast('Промокод уже использован','error');
+  const promo=PROMOS.find(p=>p.code===code);
+  if(!promo)return toast('Промокод не найден','error');
+  store.user.balance+=promo.amount;
+  store.transactions.push({id:uid('tx'),userId:store.user.id,type:'DEPOSIT',amount:promo.amount,method:'PROMO',meta:code,createdAt:now()});
+  store.promoUses.push({code,userId:store.user.id,usedAt:now()});
+  addNotification(store.user.id,'wallet','Промокод активирован: '+fmt(promo.amount));
+  persist();logAction('promo_used',{code});
+  document.getElementById('promo-input').value='';
+  renderWallet();refreshUI();
+  toast('Промокод активирован: +'+fmt(promo.amount),'success');
+}
+
+/* ================================================================
+   ПРОФИЛЬ
+   ================================================================ */
+function renderProfile(){
+  document.getElementById('prof-name').value=store.user.name||'';
+  document.getElementById('profile-info').innerHTML=`
+    <div class="pay-row"><span>Email</span><span>${esc(store.user.email||'—')}</span></div>
+    <div class="pay-row"><span>Рейтинг</span><span>${store.user.rating?'★ '+store.user.rating.toFixed(1)+' ('+store.user.ratingCount+' отзывов)':'—'}</span></div>
+    <div class="pay-row"><span>KYC</span><span class="tag tag-${store.user.kyc==='VERIFIED'?'green':store.user.kyc==='PENDING'?'yellow':'red'}">${store.user.kyc}</span></div>
+    <div class="pay-row"><span>Роль</span><span>${store.user.isAdmin?'ADMIN':'USER'}</span></div>
+    <div class="pay-row"><span>Дата регистрации</span><span>${new Date(store.user.createdAt).toLocaleDateString('ru')}</span></div>`;
+  document.getElementById('ref-code').textContent='https://nurpay.local/?ref='+store.user.referralCode;
+  document.getElementById('ref-earned').textContent=fmt(store.user.referralEarned);
+}
+function saveProfile(){
+  const name=document.getElementById('prof-name').value.trim();
+  if(name)store.user.name=name;
+  persist();refreshUI();toast('Сохранено','success');
+  logAction('profile_updated',{});
+}
+function copyRef(){
+  navigator.clipboard?.writeText('https://nurpay.local/?ref='+store.user.referralCode);
+  toast('Скопировано','success');
+}
+
+/* ================================================================
+   БЕЗОПАСНОСТЬ
+   ================================================================ */
+function renderSecurity(){
+  document.getElementById('twofa-btn').textContent=store.user.twoFA?'Отключить':'Включить';
+  document.getElementById('twofa-btn').className='btn btn-sm '+(store.user.twoFA?'btn-ghost':'');
+  document.getElementById('pin-btn').textContent=store.user.pin?'Изменить':'Установить';
+  document.getElementById('sessions-info').textContent=store.user.sessions+' активная сессия';
+  document.getElementById('limit-info').textContent='До '+fmt(store.user.limit)+' в сутки';
+  document.getElementById('kyc-btn').textContent=store.user.kyc==='VERIFIED'?'✓ Пройден':store.user.kyc==='PENDING'?'На проверке':'Пройти';
+  document.getElementById('kyc-btn').className='btn btn-sm '+(store.user.kyc==='VERIFIED'?'btn-ghost':'');
+}
+function toggle2FA(){
+  if(!store.user.twoFA){
+    const code=prompt('Введите 6-значный код (демо: 123456):','123456');
+    if(code&&code.length===6){store.user.twoFA=true;persist();toast('2FA включена','success');renderSecurity()}
+  }else{store.user.twoFA=false;persist();toast('2FA отключена','error');renderSecurity()}
+}
+function setupPin(){
+  const pin=prompt('Придумайте 4-значный PIN:');
+  if(!pin||!/^\d{4}$/.test(pin))return toast('PIN = 4 цифры','error');
+  store.user.pin=pin;persist();toast('PIN установлен','success');renderSecurity();
+}
+function killSessions(){store.user.sessions=1;persist();toast('Сессии завершены','success');renderSecurity()}
+function setLimit(){
+  const v=+prompt('Лимит вывода в сутки, ₽:',store.user.limit/100);
+  if(v>0){store.user.limit=v*100;persist();renderSecurity();toast('Лимит обновлён','success')}
+}
+function genRecovery(){
+  const codes=Array.from({length:6},()=>Math.random().toString(36).slice(2,10).toUpperCase());
+  document.getElementById('recovery-box').innerHTML=`<div class="recovery-code">${codes.join(' · ')}</div><div class="hint">Сохраните — каждый одноразовый</div>`;
+  toast('Коды созданы','success');
+}
+function requestKyc(){
+  if(store.user.kyc==='VERIFIED')return toast('KYC уже пройден','success');
+  store.user.kyc='PENDING';persist();renderSecurity();
+  toast('Заявка на KYC отправлена (демо)','success');
+}
+
+/* ================================================================
+   УВЕДОМЛЕНИЯ
+   ================================================================ */
+function addNotification(userId,type,text){
+  store.notifications.push({id:uid('n'),userId,type,text,read:false,createdAt:now()});
+  persist();renderNotifications();
+}
+function renderNotifications(){
+  if(!store.user)return;
+  const mine=store.notifications.filter(n=>n.userId===store.user.id);
+  const unread=mine.filter(n=>!n.read).length;
+  document.getElementById('notif-dot').style.display=unread?'flex':'none';
+  document.getElementById('notif-dot').textContent=unread||'';
+  const panel=document.getElementById('notif-panel');
+  if(!mine.length){panel.innerHTML='<div class="empty" style="padding:20px">Нет уведомлений</div>';return}
+  panel.innerHTML=mine.slice(-20).reverse().map(n=>`
+    <div class="notif-item ${n.read?'':'unread'}" onclick="readNotif('${n.id}')">
+      ${esc(n.text)}
+      <div class="when">${new Date(n.createdAt).toLocaleString('ru')}</div>
+    </div>`).join('');
+}
+function toggleNotif(){document.getElementById('notif-panel').classList.toggle('hidden')}
+function readNotif(id){
+  const n=store.notifications.find(x=>x.id===id);
+  if(n){n.read=true;persist();renderNotifications()}
+}
+
+/* ================================================================
+   АДМИН-ПАНЕЛЬ
+   ================================================================ */
+function renderAdmin(section){
+  if(!store.user?.isAdmin){toast('Доступ запрещён','error');return}
+  const stats=document.getElementById('admin-stats');
+  const usersCount=(store.users.length||0)+1;
+  const activeLots=store.lots.filter(l=>l.status==='ACTIVE').length;
+  const totalDeals=store.deals.length;
+  const openDisputes=store.disputes.filter(d=>d.status==='OPEN').length;
+  const pendingWd=store.withdrawRequests.filter(r=>r.status==='PENDING').length;
+  const revenue=store.deals.reduce((a,d)=>a+d.commission,0);
+  stats.innerHTML=`
+    <div class="admin-stat"><div class="lbl">Пользователей</div><div class="val">${usersCount}</div></div>
+    <div class="admin-stat"><div class="lbl">Активных лотов</div><div class="val">${activeLots}</div></div>
+    <div class="admin-stat"><div class="lbl">Сделок</div><div class="val">${totalDeals}</div></div>
+    <div class="admin-stat"><div class="lbl">Заявок на вывод</div><div class="val" style="color:var(--yellow)">${pendingWd}</div></div>
+    <div class="admin-stat"><div class="lbl">Споров</div><div class="val" style="color:var(--red)">${openDisputes}</div></div>
+    <div class="admin-stat"><div class="lbl">Доход (5%)</div><div class="val">${fmt(revenue)}</div></div>`;
+
+  const content=document.getElementById('admin-content');
+  if(section==='withdrawals'){
+    const reqs=store.withdrawRequests.slice().reverse();
+    if(!reqs.length){content.innerHTML='<div class="empty">Заявок нет</div>';return}
+    content.innerHTML='<table class="admin"><thead><tr><th>Дата</th><th>Пользователь</th><th>Сумма</th><th>Метод</th><th>Реквизиты</th><th>Статус</th><th>Действия</th></tr></thead><tbody>'+
+      reqs.map(r=>{
+        const user=[store.user,...store.users].filter(Boolean).find(u=>u.id===r.userId);
+        const det=r.details||{};
+        const detStr=det.phone||det.card||det.foreign||det.wallet||'—';
+        return `<tr>
+          <td>${new Date(r.createdAt).toLocaleString('ru')}</td>
+          <td>${esc(user?.email||r.userId.slice(-6))}</td>
+          <td>${fmt(r.amount)}</td>
+          <td>${WD_METHODS.find(m=>m.id===r.method)?.name||r.method}</td>
+          <td style="font-size:11px">${esc(detStr)}</td>
+          <td><span class="tag tag-${r.status==='PENDING'?'yellow':r.status==='APPROVED'?'green':'red'}">${r.status}</span></td>
+          <td>${r.status==='PENDING'?`
+            <button class="btn btn-sm" onclick="approveWd('${r.id}')">✅</button>
+            <button class="btn btn-sm btn-danger" onclick="rejectWd('${r.id}')">❌</button>
+          `:'✓'}</td>
+        </tr>`;
+      }).join('')+'</tbody></table>';
+  }else if(section==='disputes'){
+    if(!store.disputes.length){content.innerHTML='<div class="empty">Споров нет</div>';return}
+    content.innerHTML='<table class="admin"><thead><tr><th>Дата</th><th>Сделка</th><th>Причина</th><th>Статус</th><th>Действия</th></tr></thead><tbody>'+
+      store.disputes.slice().reverse().map(d=>`
+        <tr><td>${new Date(d.createdAt).toLocaleDateString('ru')}</td><td>${d.dealId.slice(-6)}</td><td>${esc(d.reason)}</td>
+        <td><span class="tag tag-${d.status==='OPEN'?'yellow':'green'}">${d.status}</span></td>
+        <td>${d.status==='OPEN'?`<button class="btn btn-sm" onclick="resolveDispute('${d.id}','BUYER')">К покупателю</button> <button class="btn btn-sm btn-ghost" onclick="resolveDispute('${d.id}','SELLER')">К продавцу</button>`:'✓'}</td>
+        </tr>`).join('')+'</tbody></table>';
+  }else if(section==='users'){
+    const all=[store.user,...store.users].filter(Boolean);
+    content.innerHTML='<table class="admin"><thead><tr><th>ID</th><th>Email</th><th>Имя</th><th>Баланс</th><th>Заморожено</th><th>KYC</th><th>Роль</th></tr></thead><tbody>'+
+      all.map(u=>`<tr><td>${u.id.slice(-6)}</td><td>${esc(u.email||'—')}</td><td>${esc(u.name||'—')}</td><td>${fmt(u.balance||0)}</td><td>${fmt(u.frozen||0)}</td><td>${u.kyc||'NONE'}</td><td>${u.isAdmin?'ADMIN':'USER'}</td></tr>`).join('')+'</tbody></table>';
+  }else if(section==='lots'){
+    content.innerHTML='<table class="admin"><thead><tr><th>ID</th><th>Название</th><th>Игра</th><th>Цена</th><th>Продавец</th><th>Статус</th><th></th></tr></thead><tbody>'+
+      store.lots.slice(0,50).map(l=>`
+        <tr><td>${l.id.slice(-6)}</td><td>${esc(l.title)}</td><td>${esc(l.gameName)}</td><td>${fmt(l.price)}</td>
+        <td>${esc(l.sellerName)}</td><td><span class="tag tag-${l.status==='ACTIVE'?'green':'red'}">${l.status}</span></td>
+        <td>${l.status==='ACTIVE'?`<button class="btn btn-sm btn-danger" onclick="blockLot('${l.id}')">Блок</button>`:''}</td></tr>`).join('')+'</tbody></table>';
+  }else if(section==='chats'){
+    if(!store.chats.length){content.innerHTML='<div class="empty">Чатов нет</div>';return}
+    content.innerHTML=store.chats.map(c=>{
+      const lot=store.lots.find(l=>l.id===c.lotId);
+      return `<div class="deal-card" style="margin-bottom:8px">
+        <div style="font-weight:600;margin-bottom:5px">${esc(lot?.title||c.lotId)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:7px">${c.messages.length} сообщений · создан ${new Date(c.createdAt).toLocaleString('ru')}</div>
+        <div style="max-height:150px;overflow-y:auto;font-size:12px">${c.messages.slice(-5).map(m=>`<div style="margin-bottom:4px"><b>${esc(m.authorName)}</b>: ${esc(m.text)}</div>`).join('')}</div>
+      </div>`;
+    }).join('');
+  }
+}
+function approveWd(id){
+  if(!store.user?.isAdmin)return;
+  const r=store.withdrawRequests.find(x=>x.id===id);
+  if(!r||r.status!=='PENDING')return;
+  r.status='APPROVED';
+  r.approvedAt=now();
+  r.approvedBy=store.user.id;
+  addNotification(r.userId,'wallet','Вывод одобрен: '+fmt(r.amount));
+  persist();logAction('withdraw_approved',{reqId:id,amount:r.amount});
+  renderAdmin('withdrawals');toast('Вывод одобрен','success');
+  if(r.userId===store.user.id)renderWallet();
+}
+function rejectWd(id){
+  if(!store.user?.isAdmin)return;
+  const r=store.withdrawRequests.find(x=>x.id===id);
+  if(!r||r.status!=='PENDING')return;
+  const reason=prompt('Причина отклонения:')||'Не указана';
+  r.status='REJECTED';
+  r.rejectReason=reason;
+  r.rejectedAt=now();
+  const user=r.userId===store.user.id?store.user:store.users.find(u=>u.id===r.userId);
+  if(user){user.balance+=r.amount+r.fee}
+  addNotification(r.userId,'wallet','Вывод отклонён: '+reason+'. Средства возвращены.');
+  persist();logAction('withdraw_rejected',{reqId:id,reason});
+  renderAdmin('withdrawals');toast('Вывод отклонён, средства возвращены','error');
+  if(r.userId===store.user.id)renderWallet();
+}
+function resolveDispute(id,winner){
+  if(!store.user?.isAdmin)return;
+  const d=store.disputes.find(x=>x.id===id);
+  if(!d)return;
+  d.status=winner==='BUYER'?'RESOLVED_BUYER':'RESOLVED_SELLER';
+  d.resolvedAt=now();
+  const deal=store.deals.find(x=>x.id===d.dealId);
+  if(deal&&winner==='BUYER'){
+    const buyer=deal.buyerId===store.user?.id?store.user:store.users.find(u=>u.id===deal.buyerId);
+    if(buyer){buyer.balance+=deal.amount;addNotification(buyer.id,'deal','Возврат по спору: '+deal.lotTitle)}
+    deal.status='COMPLETED';
+  }
+  persist();logAction('dispute_resolved',{disputeId:id,winner});
+  renderAdmin('disputes');toast('Спор разрешён','success');
+}
+function blockLot(id){
+  if(!store.user?.isAdmin)return;
+  const l=store.lots.find(x=>x.id===id);
+  if(l){l.status='BLOCKED';persist();logAction('lot_blocked',{lotId:id});renderAdmin('lots');renderCatalog();toast('Лот заблокирован','error')}
+}
+
+/* ================================================================
+   ИИ-АССИСТЕНТ
+   ================================================================ */
+const AI_QUICK=['Как купить?','Как вывести?','Заморозка 48ч?','Комиссия?','Спор?','Чат нельзя удалить?'];
+const AI_KB=[
+  {re:/куп|покуп/i,a:'Покупка:\n1️⃣ Откройте объявление\n2️⃣ Задайте вопрос в чате (сохраняется навсегда)\n3️⃣ «Купить» → способ оплаты\n4️⃣ Деньги в эскроу\n5️⃣ Проверьте → «Подтвердить получение»'},
+  {re:/вывод|вывести/i,a:'Вывод:\n• Средства после сделки заморожены на 48ч\n• После разморозки — заявка на вывод\n• Заявку одобряет поддержка вручную\n• Комиссия 5%\n• Способы: СБП, карта, зарубежная, USDT/BTC/ETH, ЮMoney, QIWI'},
+  {re:/заморо|48|разморо/i,a:'❄️ Заморозка 48 часов:\nПосле подтверждения получения сделки деньги продавца замораживаются на 48 часов (защита от чарджбэков). Через 48ч они переходят в «Доступный баланс». Вывести можно только после одобрения поддержки.'},
+  {re:/комисс/i,a:'Комиссия 5% от продажи и 5% при выводе. Пополнение и покупка — 0%.'},
+  {re:/спор|обман/i,a:'Спор: не подтверждайте получение → «Открыть спор». Модератор изучит логи чата (сообщения нельзя удалить). При обмане — возврат.'},
+  {re:/чат|сообщен|удал/i,a:'💬 Чаты сохраняются навсегда. Удалить сообщения или чат невозможно — это защита для арбитража.'},
+  {re:/безопас|2fa|pin/i,a:'Безопасность: 2FA, PIN на вывод, лимиты, AES-256, управление сессиями, KYC.'},
+  {re:/продать|продаж|лот/i,a:'Продажа: «Продать» → игра → категория → цена → данные. После продажи −5%. Деньги заморожены 48ч, затем доступны к выводу через одобрение.'},
+  {re:/привет|hi|hello/i,a:'Привет! 👋 Я NurPay AI. Расскажу про покупку, вывод с заморозкой 48ч, комиссию, споры и безопасность.'},
+];
+function aiFind(t){
+  for(const k of AI_KB)if(k.re.test(t))return k.a;
+  if(/оператор|человек|админ/i.test(t))return'Передаю оператору 👤 Обычно 5–15 минут.';
+  return'Я отвечаю на вопросы о покупке, продаже, оплате, выводе с заморозкой 48ч, комиссии 5%, спорах, безопасности.\nНапишите «оператор» для связи с человеком.';
+}
+function aiPush(role,text){
+  const body=document.getElementById('ai-body');
+  const div=document.createElement('div');
+  div.className='ai-msg '+role;div.textContent=text;
+  body.appendChild(div);body.scrollTop=body.scrollHeight;return div;
+}
+function aiTyping(){
+  const body=document.getElementById('ai-body');
+  const div=document.createElement('div');
+  div.className='ai-msg bot typing';
+  div.innerHTML='<span></span><span></span><span></span>';
+  body.appendChild(div);body.scrollTop=body.scrollHeight;return div;
+}
+function aiSend(text){
+  const inp=document.getElementById('ai-input');
+  const q=(text||inp.value).trim();
+  if(!q)return;
+  inp.value='';
+  aiPush('user',q);
+  store.aiHistory.push({role:'user',text:q,t:now()});
+  const t=aiTyping();
+  setTimeout(()=>{
+    t.remove();
+    const a=aiFind(q);
+    aiPush('bot',a);
+    store.aiHistory.push({role:'bot',text:a,t:now()});
+    persist();
+  },600);
+}
+function aiQuickRender(){
+  const box=document.getElementById('ai-quick');box.innerHTML='';
+  AI_QUICK.forEach(q=>{const b=document.createElement('button');b.textContent=q;b.onclick=()=>aiSend(q);box.appendChild(b)});
+}
+function toggleAI(){
+  const w=document.getElementById('ai-window');
+  const opening=w.classList.contains('hidden');
+  w.classList.toggle('hidden');
+  if(opening){
+    const body=document.getElementById('ai-body');
+    if(!store.aiHistory.length){
+      aiPush('bot','Привет! Я NurPay AI 🤖\nРасскажу про покупку, оплату, вывод с заморозкой 48ч и одобрением поддержки, комиссию 5%, споры и безопасность.');
+    }else{
+      body.innerHTML='';store.aiHistory.forEach(m=>aiPush(m.role,m.text));
+    }
+    aiQuickRender();
+    setTimeout(()=>document.getElementById('ai-input').focus(),100);
+  }
+}
+
+/* ================================================================
+   СТАРТ
+   ================================================================ */
+function init(){
+  refreshUI();
+  processUnfreeze();
+  setInterval(processUnfreeze,60000);
+  renderCatalog();
+  if(store.user)renderProfile();
+  aiQuickRender();
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      closeAuth();closeAdminLogin();closeAd();closeDeal();closePay();
+      document.getElementById('ai-window').classList.add('hidden');
+      document.getElementById('notif-panel').classList.add('hidden');
+    }
+  });
+  document.addEventListener('click',e=>{
+    const panel=document.getElementById('notif-panel');
+    const btn=document.getElementById('notif-btn');
+    if(!panel.classList.contains('hidden')&&!panel.contains(e.target)&&!btn.contains(e.target)){
+      panel.classList.add('hidden');
+    }
+  });
+}
+init();
+</script>
+</body>
+</html>
